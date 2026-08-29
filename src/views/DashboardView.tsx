@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useInventory, ensureProductBatches } from '../context/InventoryContext';
 import {
   TrendingUp,
