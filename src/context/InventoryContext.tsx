@@ -135,6 +135,16 @@ const writeStoredCollection = <T,>(key: string, value: T) => {
   // Persistence is handled by the Neon API, not browser storage.
 };
 
+const readStoredCurrentUser = (): User | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const value = window.localStorage.getItem('ims_current_user');
+    return value ? JSON.parse(value) as User : null;
+  } catch {
+    return null;
+  }
+};
+
 // Local browser data belonged to the previous storage backend. Clear it once
 // after switching to Neon so stale records are not loaded and synced again.
 const NEON_STORAGE_VERSION = 'neon-v2';
@@ -329,7 +339,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const savedCurrentUser = readStoredCollection<User | null>('ims_current_user', null);
+    const savedCurrentUser = readStoredCurrentUser();
     if (!savedCurrentUser) return null;
 
     return {
@@ -373,12 +383,19 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     let cancelled = false;
     const loadNeonData = async () => {
-      const [neonUsers, neonProducts, neonCategories, neonBrands, neonSuppliers] = await Promise.all([
+      const [neonUsers, neonProducts, neonCategories, neonBrands, neonSuppliers, neonSales, neonPurchases, neonExpenses, neonIncomes, neonReturns, neonAdjustments, neonTransfers] = await Promise.all([
         fetchCollectionFromNeon<User>('users'),
         fetchCollectionFromNeon<Product>('products'),
         fetchCollectionFromNeon<Category>('categories'),
         fetchCollectionFromNeon<Brand>('brands'),
         fetchCollectionFromNeon<Supplier>('suppliers'),
+        fetchCollectionFromNeon<Sale>('sales'),
+        fetchCollectionFromNeon<Purchase>('purchases'),
+        fetchCollectionFromNeon<Expense>('expenses'),
+        fetchCollectionFromNeon<Income>('incomes'),
+        fetchCollectionFromNeon<Return>('returns'),
+        fetchCollectionFromNeon<StockAdjustment>('adjustments'),
+        fetchCollectionFromNeon<StockTransfer>('transfers'),
       ]);
 
       if (cancelled) return;
@@ -394,6 +411,13 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (neonCategories) setCategories(neonCategories);
       if (neonBrands) setBrands(neonBrands);
       if (neonSuppliers) setSuppliers(neonSuppliers);
+      if (neonSales) setSales(neonSales);
+      if (neonPurchases) setPurchases(neonPurchases);
+      if (neonExpenses) setExpenses(neonExpenses);
+      if (neonIncomes) setIncomes(neonIncomes);
+      if (neonReturns) setReturns(neonReturns);
+      if (neonAdjustments) setAdjustments(neonAdjustments);
+      if (neonTransfers) setTransfers(neonTransfers);
       setNeonLoaded(true);
     };
 
@@ -446,8 +470,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [suppliers, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_sales', sales);
-  }, [sales]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('sales', sales);
+  }, [sales, neonLoaded]);
 
   useEffect(() => {
     writeStoredCollection('ims_purchases', purchases);

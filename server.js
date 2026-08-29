@@ -117,6 +117,13 @@ app.get('/api/data/:collection', async (req, res) => {
       categories: () => prisma.category.findMany({ orderBy: { createdAt: 'asc' } }),
       brands: () => prisma.brand.findMany({ orderBy: { createdAt: 'asc' } }),
       suppliers: () => prisma.supplier.findMany({ orderBy: { createdAt: 'asc' } }),
+      sales: () => prisma.sale.findMany({ include: { items: true }, orderBy: { date: 'desc' } }),
+      purchases: () => prisma.purchase.findMany({ include: { items: true }, orderBy: { date: 'desc' } }),
+      expenses: () => prisma.expense.findMany({ orderBy: { date: 'desc' } }),
+      incomes: () => prisma.income.findMany({ orderBy: { date: 'desc' } }),
+      returns: () => prisma.return.findMany({ include: { items: true }, orderBy: { date: 'desc' } }),
+      adjustments: () => prisma.stockAdjustment.findMany({ orderBy: { date: 'desc' } }),
+      transfers: () => prisma.stockTransfer.findMany({ orderBy: { date: 'desc' } }),
     };
     const query = queries[req.params.collection];
     if (!query) return res.status(404).json({ ok: false, error: 'Unknown collection' });
@@ -357,6 +364,36 @@ async function persistCollection(collection, records = []) {
           updatedAt: cleaned.updatedAt ? new Date(cleaned.updatedAt) : new Date(),
         },
       });
+      continue;
+    }
+
+    if (collection === 'sales') {
+      await prisma.sale.upsert({
+        where: { invoiceNo: cleaned.invoiceNo },
+        update: {
+          receiptSerial: cleaned.receiptSerial || null, date: new Date(cleaned.date), customerName: cleaned.customerName,
+          subtotal: Number(cleaned.subtotal || 0), discount: Number(cleaned.discount || 0), tax: Number(cleaned.tax || 0),
+          total: Number(cleaned.total || 0), paidAmount: Number(cleaned.paidAmount || 0), paymentMethod: cleaned.paymentMethod,
+          status: cleaned.status, salesperson: cleaned.salesperson, isOffline: Boolean(cleaned.isOffline),
+          costOfGoodsSold: cleaned.costOfGoodsSold == null ? null : Number(cleaned.costOfGoodsSold), updatedAt: new Date(),
+        },
+        create: {
+          id: cleaned.id, invoiceNo: cleaned.invoiceNo, receiptSerial: cleaned.receiptSerial || null, date: new Date(cleaned.date),
+          customerName: cleaned.customerName, subtotal: Number(cleaned.subtotal || 0), discount: Number(cleaned.discount || 0),
+          tax: Number(cleaned.tax || 0), total: Number(cleaned.total || 0), paidAmount: Number(cleaned.paidAmount || 0),
+          paymentMethod: cleaned.paymentMethod, status: cleaned.status, salesperson: cleaned.salesperson, isOffline: Boolean(cleaned.isOffline),
+          costOfGoodsSold: cleaned.costOfGoodsSold == null ? null : Number(cleaned.costOfGoodsSold),
+          createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date(),
+        },
+      });
+      const sale = await prisma.sale.findUniqueOrThrow({ where: { invoiceNo: cleaned.invoiceNo } });
+      await prisma.saleItem.deleteMany({ where: { saleId: sale.id } });
+      if (Array.isArray(cleaned.items) && cleaned.items.length) {
+        await prisma.saleItem.createMany({ data: cleaned.items.map((item) => ({
+          id: item.id || `${sale.id}-${item.productId}`, saleId: sale.id, productId: item.productId, productName: item.productName,
+          quantity: Number(item.quantity || 0), price: Number(item.price || 0), cost: item.cost == null ? null : Number(item.cost),
+        })) });
+      }
       continue;
     }
 
