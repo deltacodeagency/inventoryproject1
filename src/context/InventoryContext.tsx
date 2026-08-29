@@ -138,11 +138,14 @@ const writeStoredCollection = <T,>(key: string, value: T) => {
 const readStoredCurrentUser = (): User | null => {
   if (typeof window === 'undefined') return null;
   try {
-    const value = window.localStorage.getItem('ims_current_user');
-    return value ? JSON.parse(value) as User : null;
+    const match = document.cookie.match(/(?:^|; )ims_current_user=([^;]+)/);
+    if (match) {
+      return JSON.parse(decodeURIComponent(match[1])) as User;
+    }
   } catch {
     return null;
   }
+  return null;
 };
 
 // Local browser data belonged to the previous storage backend. Clear it once
@@ -439,9 +442,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     if (currentUser) {
-      writeStoredCollection('ims_current_user', currentUser);
-    } else if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('ims_current_user');
+      document.cookie = `ims_current_user=${encodeURIComponent(JSON.stringify(currentUser))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    } else if (typeof document !== 'undefined') {
+      document.cookie = 'ims_current_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   }, [currentUser]);
 
