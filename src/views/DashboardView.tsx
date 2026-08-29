@@ -104,7 +104,7 @@ export const DashboardView: React.FC = () => {
 
   // --- CORE TOTALS (REAL-TIME DATA) ---
   const totalSalesVal = useMemo(() => sales.reduce((sum, s) => sum + (s.total || 0), 0), [sales]);
-  const totalPurchasesVal = useMemo(() => purchases.reduce((sum, p) => sum + (p.total || 0), 0), [purchases]);
+  const totalPurchasesVal = useMemo(() => { return products.reduce((sum, p) => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); const batchVal = batches.reduce((bSum, b) => bSum + ((b.initialQuantity || b.quantity || 0) * (b.cost || 0)), 0); return sum + batchVal; }, 0); }, [products]); const totalStockEntries = useMemo(() => { return products.reduce((sum, p) => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); return sum + batches.length; }, 0); }, [products]);
   const totalExpensesVal = useMemo(() => expenses.reduce((sum, e) => sum + (e.amount || 0), 0), [expenses]);
 
   // Stock Asset Value (calculated using batches or product cost * stock)
@@ -139,10 +139,7 @@ export const DashboardView: React.FC = () => {
     () => sales.filter(s => isWithinRange(s.date, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate)),
     [sales, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate]
   );
-  const filteredPurchasesForChart = useMemo(
-    () => purchases.filter(p => isWithinRange(p.date, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate)),
-    [purchases, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate]
-  );
+  const allStockAdditions = useMemo(() => { const additions = []; products.forEach(p => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); batches.forEach(b => { additions.push({ date: b.date || p.createdAt || new Date().toISOString(), total: (b.initialQuantity || b.quantity || 0) * (b.cost || 0) }); }); }); return additions; }, [products]); const filteredPurchasesForChart = useMemo(() => allStockAdditions.filter(p => isWithinRange(p.date, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate)), [allStockAdditions, salesPurchaseRange, salesPurchaseStartDate, salesPurchaseEndDate]);
 
   const salesPurchasePeriodSum = useMemo(() => {
     const sSum = filteredSalesForChart.reduce((acc, s) => acc + (s.total || 0), 0);
@@ -467,7 +464,7 @@ export const DashboardView: React.FC = () => {
             <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(totalPurchasesVal).toLocaleString()}</h3>
             <span className="text-[10px] sm:text-[11px] text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded-full w-fit">
               <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
-              <span className="truncate">{purchases.length} supplier orders</span>
+              <span className="truncate">{totalStockEntries} stock additions</span>
             </span>
           </div>
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 z-10 shadow-inner">
