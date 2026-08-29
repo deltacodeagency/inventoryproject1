@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "server": "tsx server.js",
-    "build:api": "esbuild server.js --bundle --platform=node --format=esm --outfile=api/_server-bundle.mjs --packages=external",
+    "build:api": "esbuild ./server.js --bundle --platform=node --format=esm --outfile=api/_server-bundle.mjs --packages=external",
     "build": "prisma generate && vite build && npm run build:api",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

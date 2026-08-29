@@ -11,7 +11,7 @@ let prismaInstance: any = null;
 // Only instantiate Prisma Client on Node.js / Server side
 if (typeof window === "undefined") {
   try {
-    const { PrismaClient } = nodeRequire("../generated/prisma");
+    const { PrismaClient } = nodeRequire("@prisma/client");
 
     const globalForPrisma = globalThis as unknown as {
       prisma?: any;

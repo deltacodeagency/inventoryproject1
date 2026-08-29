@@ -7,9 +7,9 @@ import path from 'node:path';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './src/lib/auth.ts';
 import { sendEmail } from './src/lib/email.ts';
+import { PrismaClient } from '@prisma/client';
 
 const require = createRequire(import.meta.url);
-const { PrismaClient } = require('./src/generated/prisma');
 const bcrypt = require('bcrypt');
 
 const app = express();
