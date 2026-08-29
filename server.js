@@ -1,6 +1,5 @@
 import express from 'express';
 import 'dotenv/config';
-import { createRequire } from 'node:module';
 import { randomInt, randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -8,9 +7,7 @@ import { toNodeHandler } from 'better-auth/node';
 import { auth } from './src/lib/auth.ts';
 import { sendEmail } from './src/lib/email.ts';
 import { PrismaClient } from '@prisma/client';
-
-const require = createRequire(import.meta.url);
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcryptjs';
 
 const app = express();
 const port = Number(process.env.API_PORT || 3003);
