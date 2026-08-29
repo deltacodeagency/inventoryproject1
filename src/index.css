@@ -1,0 +1,450 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: #f4f7fb;
+}
+
+@media (max-width: 639px) {
+  .mobile-page-description {
+    display: none;
+  }
+
+  .mobile-page-header {
+    display: none;
+  }
+
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom micro-animations for high fidelity interactions */
+@keyframes swing {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+}
+
+.animate-swing {
+  animation: swing 1s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrollbars customized */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.35);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.55);
+}
+
+/* Rich Text Styling for descriptions */
+.rich-text-content h1 {
+  font-size: 1.125rem !important; /* text-lg */
+  font-weight: 700 !important;
+  color: #1e293b !important; /* text-slate-800 */
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.375rem !important;
+}
+.rich-text-content h2 {
+  font-size: 1rem !important; /* text-base */
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  margin-top: 0.625rem !important;
+  margin-bottom: 0.375rem !important;
+}
+.rich-text-content p {
+  line-height: 1.625 !important;
+  color: #475569 !important; /* text-slate-600 */
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.rich-text-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.375rem !important;
+  margin-bottom: 0.375rem !important;
+}
+.rich-text-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.375rem !important;
+  margin-bottom: 0.375rem !important;
+}
+.rich-text-content li {
+  line-height: 1.625 !important;
+  color: #475569 !important;
+}
+.rich-text-content a {
+  color: #2563eb !important; /* text-blue-600 */
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+}
+.rich-text-content a:hover {
+  color: #1d4ed8 !important;
+}
+.rich-text-content u {
+  text-decoration: underline !important;
+}
+
+/* Contenteditable Placeholder */
+.rich-editor[contenteditable]:empty::before {
+  content: attr(placeholder);
+  color: #94a3b8 !important; /* text-slate-400 */
+  font-style: italic;
+  cursor: text;
+  pointer-events: none;
+}
+
+/* Rich Editor live styling */
+.rich-editor h1 {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.rich-editor h2 {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.rich-editor p {
+  line-height: 1.625 !important;
+  color: #475569 !important;
+  margin-top: 0.125rem !important;
+  margin-bottom: 0.125rem !important;
+}
+.rich-editor ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.rich-editor ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+.rich-editor li {
+  line-height: 1.625 !important;
+  color: #475569 !important;
+}
+.rich-editor a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+}
+
+/* Print Receipt Styling */
+@page {
+  size: auto;
+  margin: 0mm;
+}
+
+#printable-receipt-section {
+  display: none;
+}
+
+@media print {
+  body > *:not(#printable-receipt-section) {
+    display: none !important;
+  }
+  #printable-receipt-section {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+
+/* Shared select treatment: one rounded, responsive visual language while
+   preserving native select behavior and accessibility. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding-block: 0.4375rem;
+  padding-inline-end: 2.25rem;
+  border: 1px solid #dbe4f0;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364778b' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 0.875rem;
+  color: #334155;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+select:hover {
+  border-color: #b8c8dc;
+  background-color: #fbfdff;
+}
+
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.14);
+}
+
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+select option {
+  color: #334155;
+  background: #ffffff;
+  font-size: 0.6875rem;
+}
+
+/* Small selects used in toolbars and dense action rows. */
+select.select-compact {
+  min-height: 2rem;
+  padding: 0.375rem 2rem 0.375rem 0.625rem;
+  border-radius: 0.625rem;
+  background-position: right 0.5rem center;
+  background-size: 0.875rem;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+@media (max-width: 640px) {
+  select {
+    min-height: 2.25rem;
+    padding-inline-end: 2.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.6875rem;
+  }
+
+  select.select-compact {
+    min-height: 2.25rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Custom filter dropdowns. Native option popups cannot be rounded reliably
+   across browsers, so filter menus use this shared floating treatment. */
+.app-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 640px) {
+  .app-select.admin-role-select {
+    width: 140px;
+    flex: 0 0 140px;
+  }
+}
+
+.app-select-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 2.125rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #dbe4f0;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.app-select-trigger:hover,
+.app-select-trigger[aria-expanded='true'] {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.12);
+}
+
+.app-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.app-select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-select-chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-right: 1.5px solid #64748b;
+  border-bottom: 1.5px solid #64748b;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 160ms ease;
+}
+
+.app-select-chevron-open {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.app-select-menu {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  width: 100%;
+  max-height: min(18rem, 45vh);
+  overflow-y: auto;
+  padding: 0.3rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.875rem;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgb(15 23 42 / 0.16), 0 3px 8px rgb(15 23 42 / 0.08);
+  animation: appSelectIn 140ms ease-out;
+}
+
+.quick-adjust-panel .app-select-menu {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.manage-stock-page button:not(:disabled),
+.stock-adjustment-page button:not(:disabled) {
+  cursor: pointer;
+}
+
+.app-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.4rem 0.625rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.app-select-option:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.app-select-option-selected {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.app-select-option-selected:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.app-select-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.app-select-check {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.app-select-required {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes appSelectIn {
+  from { opacity: 0; transform: translateY(-3px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .export-columns-menu {
+    position: fixed !important;
+    top: var(--export-columns-top) !important;
+    left: var(--export-columns-left) !important;
+    right: auto !important;
+    width: var(--export-columns-width) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    margin-top: 0 !important;
+  }
+}

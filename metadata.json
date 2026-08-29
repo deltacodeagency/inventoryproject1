@@ -1,0 +1,6 @@
+{
+  "name": "Inventory Management System",
+  "description": "A comprehensive POS and Inventory Management System featuring real-time stock tracking, low-inventory alerts, custom sales dashboards, and interactive POS operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
