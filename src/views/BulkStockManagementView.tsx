@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useInventory } from '../context/InventoryContext';
 import { AppSelect } from '../components/AppSelect';
-import { ArrowLeft, CheckSquare, Package, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Package, Plus, Minus, Layers, List, LayoutGrid } from 'lucide-react';
 
 export const BulkStockManagementView: React.FC = () => {
   const { products, addStockAdjustment, setActiveView, currentUser } = useInventory();
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [type, setType] = useState<'addition' | 'deduction'>('addition');
@@ -89,9 +90,9 @@ export const BulkStockManagementView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={goBack} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:border-blue-300 hover:text-blue-600" title="Back to Manage Stock">
-            <ArrowLeft className="h-4 w-4" />
-          </button>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+            <Layers className="h-5 w-5" />
+          </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800">Bulk Stock Management</h2>
             <p className="text-xs text-slate-500">Increase or decrease stock for multiple products and confirm all changes together.</p>
@@ -115,11 +116,39 @@ export const BulkStockManagementView: React.FC = () => {
         <div className="rounded-xl border border-blue-100 bg-white p-3">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">All Products</p>
-            <button type="button" onClick={toggleAll} className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700"><CheckSquare className="h-3.5 w-3.5" />{allSelected ? 'Clear All' : 'Select All'}</button>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                <button type="button" onClick={() => setViewMode('list')} className={`p-1 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'}`}><List className="w-3.5 h-3.5" /></button>
+                <button type="button" onClick={() => setViewMode('grid')} className={`p-1 rounded-md ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'}`}><LayoutGrid className="w-3.5 h-3.5" /></button>
+              </div>
+              <button type="button" onClick={toggleAll} className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700"><CheckSquare className="h-3.5 w-3.5" />{allSelected ? 'Clear All' : 'Select All'}</button>
+            </div>
           </div>
-          <div className="max-h-[55vh] space-y-1 overflow-y-auto pr-1">
+          <div className={`max-h-[55vh] overflow-y-auto pr-1 ${viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3' : 'space-y-1'}`}>
             {products.length > 0 ? products.map((product) => {
               const selected = selectedIds.includes(product.id);
+              if (viewMode === 'grid') {
+                return (
+                  <div key={product.id} onClick={() => toggleProduct(product.id)} className={`rounded-xl p-2.5 text-left shadow-sm transition-all flex flex-col justify-between relative cursor-pointer border ${selected ? 'bg-blue-50/50 border-2 border-blue-400' : 'bg-white border-slate-100 hover:border-blue-200'}`}>
+                    <div className="absolute top-2 left-2 z-10">
+                      <input type="checkbox" checked={selected} onClick={(e) => e.stopPropagation()} onChange={() => toggleProduct(product.id)} className="h-3.5 w-3.5 accent-blue-600" aria-label={`Select ${product.name}`} />
+                    </div>
+                    <div className="mb-2 relative rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center aspect-square mt-3">
+                      {product.image ? <img src={product.image} alt="" className="w-full h-full object-cover" /> : <Package className="w-8 h-8 text-slate-300" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-700 line-clamp-2 leading-tight mb-0.5">{product.name}</p>
+                      <p className="text-[9px] font-semibold text-slate-400 mb-1.5">{product.sku}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-slate-600">Stock: {product.stock}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <input type="number" min="1" value={quantities[product.id] || 1} onClick={(e) => e.stopPropagation()} onChange={(e) => setQuantities((current) => ({ ...current, [product.id]: Math.max(1, Number(e.target.value)) }))} className="w-full rounded-md border border-slate-200 bg-white p-1.5 text-center text-[11px] font-bold text-slate-700 focus:border-blue-500 focus:outline-none" aria-label={`Quantity for ${product.name}`} />
+                    </div>
+                  </div>
+                );
+              }
               return (
                 <div key={product.id} onClick={() => toggleProduct(product.id)} className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors ${selected ? 'border-blue-200 bg-blue-50/60' : 'border-slate-100 bg-slate-50/40 hover:border-blue-200'}`}>
                   <input type="checkbox" checked={selected} onClick={(e) => e.stopPropagation()} onChange={() => toggleProduct(product.id)} className="h-4 w-4 accent-blue-600" aria-label={`Select ${product.name}`} />

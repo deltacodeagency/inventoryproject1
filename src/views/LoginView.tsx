@@ -222,7 +222,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onNavigate }) => {
           <div className="text-center pt-2 border-t border-slate-800/80">
             <button
               onClick={() => onNavigate('/')}
-              className="text-xs text-slate-400 hover:text-white font-semibold transition-colors"
+              className="hidden sm:inline-block text-xs text-slate-400 hover:text-white font-semibold transition-colors"
             >
               ← Back to Homepage
             </button>

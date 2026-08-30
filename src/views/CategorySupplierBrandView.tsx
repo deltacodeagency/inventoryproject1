@@ -71,7 +71,7 @@ export const CategoryView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mobile-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mobile-page-header flex items-center justify-between gap-4">
         <div>
           <h3 className="text-base font-bold text-slate-800">Category Catalog</h3>
           <span className="text-[10px] text-slate-400 block -mt-0.5">Organize store catalog items into index groups</span>
@@ -339,7 +339,7 @@ export const BrandView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mobile-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mobile-page-header flex items-center justify-between gap-4">
         <div>
           <h3 className="text-base font-bold text-slate-800">Brand Management</h3>
           <span className="text-[10px] text-slate-400 block -mt-0.5">Control registered manufacturing brands and catalogs</span>
@@ -608,7 +608,7 @@ export const SupplierView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="mobile-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mobile-page-header flex items-center justify-between gap-4">
         <div>
           <h3 className="text-base font-bold text-slate-800">Supplier Directory</h3>
           <span className="text-[10px] text-slate-400 block -mt-0.5">Manage live wholesale supply lines and logistics</span>
