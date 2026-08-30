@@ -109,12 +109,12 @@ export const BulkStockManagementView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="hidden sm:flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
             <Layers className="h-5 w-5" />
           </div>
-          <div className="hidden sm:block">
+          <div>
             <h2 className="text-xl font-bold text-slate-800">Bulk Stock Management</h2>
             <p className="text-xs text-slate-500">Increase or decrease stock for multiple products and confirm all changes together.</p>
           </div>
@@ -123,6 +123,7 @@ export const BulkStockManagementView: React.FC = () => {
       </div>
 
       <form onSubmit={handleConfirm} className="space-y-4 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 shadow-sm">
+        <span className="text-xs font-bold text-blue-700 sm:hidden block">{selectedIds.length} selected</span>
         <div className="grid grid-cols-1 gap-3 text-xs md:grid-cols-3">
           <div className="flex rounded-xl border border-slate-200 bg-white p-1">
             <button type="button" onClick={() => setType('addition')} className={`flex-1 rounded-lg px-2 py-2 font-bold ${type === 'addition' ? 'bg-emerald-100 text-emerald-700' : 'text-slate-500'}`}><Plus className="mr-1 inline h-3.5 w-3.5" />Increase</button>
