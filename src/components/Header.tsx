@@ -116,6 +116,8 @@ export const Header: React.FC = () => {
         return 'Inventory > Brand Management';
       case 'manage-stock':
         return 'Stock > Manage Stock';
+      case 'bulk-stock':
+        return 'Stock > Bulk Stock Management';
       case 'stock-adjustment':
         return 'Stock > Stock Adjustment';
       case 'invoice':
@@ -164,6 +166,7 @@ export const Header: React.FC = () => {
     { id: 'supplier', label: 'Supplier Directory', pathName: 'Inventory > Supplier' },
     { id: 'brand', label: 'Brand Management', pathName: 'Inventory > Brand' },
     { id: 'manage-stock', label: 'Manage Stock', pathName: 'Stock > Manage Stock' },
+    { id: 'bulk-stock', label: 'Bulk Stock Management', pathName: 'Stock > Bulk Stock Management' },
     { id: 'stock-adjustment', label: 'Stock Adjustment', pathName: 'Stock > Stock Adjustment' },
     { id: 'invoice', label: 'Sales & Invoices', pathName: 'Sales > Sales & Invoices' },
     { id: 'return', label: 'Customer Returns', pathName: 'Sales > Return' },
