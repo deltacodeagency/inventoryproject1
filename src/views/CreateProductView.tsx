@@ -4,6 +4,7 @@ import { useInventory } from '../context/InventoryContext';
 import { uploadImageToImgBB } from '../lib/image-upload';
 import Swal from 'sweetalert2';
 import { AppSelect } from '../components/AppSelect';
+import { appNavigate } from '../lib/appNavigate';
 import {
   RotateCw,
   ChevronUp,
@@ -566,6 +567,7 @@ export const CreateProductView: React.FC = () => {
 
     // Go back to the products listing
     setActiveView('products');
+    appNavigate('/products');
   };
 
   return (
@@ -629,6 +631,7 @@ export const CreateProductView: React.FC = () => {
             onClick={() => {
               setEditingProduct(null);
               setActiveView('products');
+              appNavigate('/products');
             }}
             className="px-4 py-2 bg-[#0f172a] text-white hover:bg-slate-800 font-bold text-xs rounded-lg transition-all flex items-center gap-2 shadow-sm cursor-pointer"
           >
@@ -1336,6 +1339,7 @@ export const CreateProductView: React.FC = () => {
             onClick={() => {
               setEditingProduct(null);
               setActiveView('products');
+              appNavigate('/products');
             }}
             className="px-5 py-2.5 bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
           >

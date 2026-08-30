@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { InventoryProvider, useInventory } from './context/InventoryContext';
 import { Sidebar } from './components/Sidebar';
@@ -32,10 +32,19 @@ import { ResetPasswordView } from './views/ResetPasswordView';
 const MainAppContent: React.FC = () => {
   const { activeView, setActiveView, currentUser, isAuthLoading, logoutUser, setEditingProduct, setViewingProduct } = useInventory();
   
+  const mainRef = useRef<HTMLElement>(null);
+
   // Real URL path state (`/`, `/login`, `/dashboard`, etc.)
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return typeof window !== 'undefined' ? window.location.pathname : '/';
   });
+
+  // Scroll to top on route change
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo(0, 0);
+    }
+  }, [activeView, currentPath]);
 
   // Sync browser back/forward buttons
   useEffect(() => {
@@ -54,6 +63,7 @@ const MainAppContent: React.FC = () => {
       '/pos': 'pos',
       '/products': 'products',
       '/create-product': 'create-product',
+      '/view-product': 'view-product',
       '/category': 'category',
       '/supplier': 'supplier',
       '/brand': 'brand',
@@ -95,6 +105,7 @@ const MainAppContent: React.FC = () => {
     else if (path === '/bulk-stock') setActiveView('bulk-stock');
     else if (path === '/admin-console') setActiveView('super-admin');
     else if (path === '/create-product') setActiveView('create-product');
+    else if (path === '/view-product') setActiveView('view-product');
     else if (path === '/stock-adjustment') setActiveView('stock-adjustment');
     else if (path === '/category') setActiveView('category');
     else if (path === '/supplier') setActiveView('supplier');
@@ -186,7 +197,7 @@ const MainAppContent: React.FC = () => {
         <Header />
 
         {/* Content View Body */}
-        <main className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100dvh-96px)] lg:max-h-[calc(100dvh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
+        <main ref={mainRef} className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100dvh-96px)] lg:max-h-[calc(100dvh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
           <div className={`max-w-7xl mx-auto w-full ${activeView === 'pos' ? 'lg:flex-1 lg:flex lg:flex-col lg:min-h-0 lg:h-full pb-16 lg:pb-0' : 'pb-16 md:pb-0'}`}>
             {renderView()}
           </div>

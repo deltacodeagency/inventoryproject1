@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { confirmToast } from '../lib/confirmToast';
+import { appNavigate } from '../lib/appNavigate';
 import {
   Bell,
   Search,
@@ -294,6 +295,7 @@ export const Header: React.FC = () => {
                             onClick={() => {
                               setViewingProduct(p);
                               setActiveView('view-product');
+                              appNavigate('/view-product');
                               setSearchTerm('');
                               setIsSearchFocused(false);
                             }}

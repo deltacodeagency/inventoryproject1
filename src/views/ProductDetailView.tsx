@@ -2,6 +2,7 @@ import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { ArrowLeft, ChevronLeft, ChevronRight, Mail, Phone, MapPin, Building, Info, FileText, User, Calendar, Clock } from 'lucide-react';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { appNavigate } from '../lib/appNavigate';
 
 export const ProductDetailView: React.FC = () => {
   const {
@@ -18,7 +19,10 @@ export const ProductDetailView: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center max-w-md mx-auto my-12 shadow-sm">
         <p className="text-sm font-semibold text-slate-500 mb-4">No product selected for details.</p>
         <button
-          onClick={() => setActiveView('products')}
+          onClick={() => {
+            setActiveView('products');
+            appNavigate('/products');
+          }}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors"
         >
           Back to Product List
@@ -50,6 +54,7 @@ export const ProductDetailView: React.FC = () => {
           onClick={() => {
             setViewingProduct(null);
             setActiveView('products');
+            appNavigate('/products');
           }}
           className="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 font-bold text-xs rounded-lg transition-all flex items-center gap-2 shadow-sm cursor-pointer"
         >

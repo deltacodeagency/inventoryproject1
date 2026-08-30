@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Product } from '../types';
 import { AppSelect } from '../components/AppSelect';
+import { appNavigate } from '../lib/appNavigate';
 import ExcelJS from 'exceljs';
 
 export const ProductsView: React.FC = () => {
@@ -1229,6 +1230,7 @@ export const ProductsView: React.FC = () => {
               onClick={() => {
                 setEditingProduct(null);
                 setActiveView('create-product');
+                appNavigate('/create-product');
               }}
               className="px-2.5 py-1.5 sm:px-4 sm:py-2.5 bg-blue-600 text-white font-bold text-[10px] sm:text-xs rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/15 flex items-center space-x-1 sm:space-x-1.5 whitespace-nowrap cursor-pointer flex-1 justify-center"
             >
@@ -1514,6 +1516,7 @@ export const ProductsView: React.FC = () => {
                           onClick={() => {
                             setViewingProduct(p);
                             setActiveView('view-product');
+                            appNavigate('/view-product');
                           }}
                           className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800 transition-all flex items-center justify-center cursor-pointer"
                           title="View Details"
@@ -1527,6 +1530,7 @@ export const ProductsView: React.FC = () => {
                               onClick={() => {
                                 setEditingProduct(p);
                                 setActiveView('create-product');
+                                appNavigate('/create-product');
                               }}
                               className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 transition-all flex items-center justify-center cursor-pointer"
                               title="Edit Details"
@@ -1701,6 +1705,7 @@ export const ProductsView: React.FC = () => {
                               onClick={() => {
                                 setViewingProduct(p);
                                 setActiveView('view-product');
+                                appNavigate('/view-product');
                               }}
                               className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800 transition-all flex items-center justify-center cursor-pointer"
                               title="View Details"
@@ -1714,6 +1719,7 @@ export const ProductsView: React.FC = () => {
                                   onClick={() => {
                                     setEditingProduct(p);
                                     setActiveView('create-product');
+                                    appNavigate('/create-product');
                                   }}
                                   className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 transition-all flex items-center justify-center cursor-pointer"
                                   title="Edit Details"
