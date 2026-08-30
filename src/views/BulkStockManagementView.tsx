@@ -6,7 +6,7 @@ import { ArrowLeft, CheckSquare, Package, Plus, Minus, Layers, List, LayoutGrid 
 
 export const BulkStockManagementView: React.FC = () => {
   const { products, addStockAdjustment, setActiveView, currentUser } = useInventory();
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(typeof window !== 'undefined' && window.innerWidth < 768 ? 'grid' : 'list');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [type, setType] = useState<'addition' | 'deduction'>('addition');
@@ -114,7 +114,7 @@ export const BulkStockManagementView: React.FC = () => {
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
             <Layers className="h-5 w-5" />
           </div>
-          <div>
+          <div className="hidden sm:block">
             <h2 className="text-xl font-bold text-slate-800">Bulk Stock Management</h2>
             <p className="text-xs text-slate-500">Increase or decrease stock for multiple products and confirm all changes together.</p>
           </div>

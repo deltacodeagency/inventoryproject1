@@ -9,7 +9,8 @@ import {
   MonitorCheck,
   Layers,
   User,
-  LogOut
+  LogOut,
+  ArrowUp
 } from 'lucide-react';
 import { TakaIcon } from './components/TakaIcon';
 import { HomeView } from './views/HomeView';
@@ -38,6 +39,27 @@ const MainAppContent: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return typeof window !== 'undefined' ? window.location.pathname : '/';
   });
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mainRef.current) {
+        setShowScrollTop(mainRef.current.scrollTop > 200);
+      }
+    };
+    const mainEl = mainRef.current;
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll);
+      return () => mainEl.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  const scrollToTop = () => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Scroll to top on route change
   useEffect(() => {
@@ -298,6 +320,18 @@ const MainAppContent: React.FC = () => {
           </button>
         </nav>
       </div>
+
+      {/* Scroll to top FAB */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all duration-300 md:bottom-8 md:right-8 bottom-20 right-4 ${
+          showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
+        }`}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
+
     </div>
     </>
   );

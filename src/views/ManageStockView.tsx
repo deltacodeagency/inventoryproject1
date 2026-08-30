@@ -349,9 +349,9 @@ export const ManageStockView: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           {/* Search SKU or Name */}
-          <div className="relative col-span-1 md:col-span-2">
+          <div className="relative col-span-2 md:col-span-2">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -363,7 +363,7 @@ export const ManageStockView: React.FC = () => {
           </div>
 
           {/* Category Filter */}
-          <div>
+          <div className="col-span-1">
             <AppSelect
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -379,7 +379,7 @@ export const ManageStockView: React.FC = () => {
           </div>
 
           {/* Status Filter */}
-          <div>
+          <div className="col-span-1">
             <AppSelect
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
