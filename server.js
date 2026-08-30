@@ -328,7 +328,7 @@ async function persistCollection(collection, records = []) {
       const sku = cleaned.sku || cleaned.id;
       const createdBy = normalizeAuditIdentity(cleaned.createdBy);
 
-      await prisma.product.upsert({
+      const prod = await prisma.product.upsert({
         where: { sku },
         update: {
           name: cleaned.name,
@@ -364,6 +364,33 @@ async function persistCollection(collection, records = []) {
           updatedAt: cleaned.updatedAt ? new Date(cleaned.updatedAt) : new Date(),
         },
       });
+
+      if (Array.isArray(cleaned.batches) && cleaned.batches.length) {
+        for (const batch of cleaned.batches) {
+          await prisma.productBatch.upsert({
+            where: { id: batch.id },
+            update: {
+              quantity: Number(batch.quantity || 0),
+              initialQuantity: Number(batch.initialQuantity || batch.quantity || 0),
+              cost: Number(batch.cost || 0),
+              price: Number(batch.price || 0),
+              date: batch.date ? new Date(batch.date) : new Date(),
+              updatedAt: new Date()
+            },
+            create: {
+              id: batch.id || ("batch-" + Date.now() + "-" + Math.random().toString(36).substring(2, 9)),
+              productId: prod.id,
+              quantity: Number(batch.quantity || 0),
+              initialQuantity: Number(batch.initialQuantity || batch.quantity || 0),
+              cost: Number(batch.cost || 0),
+              price: Number(batch.price || 0),
+              date: batch.date ? new Date(batch.date) : new Date(),
+              createdAt: batch.createdAt ? new Date(batch.createdAt) : new Date(),
+              updatedAt: new Date()
+            }
+          });
+        }
+      }
       continue;
     }
 
