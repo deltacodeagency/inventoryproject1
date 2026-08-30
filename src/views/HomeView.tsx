@@ -19,6 +19,7 @@ import {
 
 interface HomeViewProps {
   onNavigate: (path: string) => void;
+  currentUser?: any;
 }
 
 const features = [
@@ -30,13 +31,13 @@ const features = [
   { icon: ShieldCheck, title: 'Better Auth', detail: 'Secure Sessions', color: 'text-rose-400' },
 ];
 
-export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
+export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) => {
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-slate-950 font-sans text-slate-100 selection:bg-blue-500 selection:text-white">
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-600/15 blur-[120px] sm:h-96 sm:w-96" />
       <div className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-indigo-600/15 blur-[140px]" />
 
-      <header className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 bg-slate-950/80 px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4">
+      <header className="relative z-20 flex items-center justify-between gap-2 border-b border-slate-800/80 bg-slate-950/80 px-3 py-3 backdrop-blur-md sm:gap-3 sm:px-6 sm:py-4">
         <button className="flex min-w-0 items-center gap-2.5 text-left sm:gap-3" onClick={() => onNavigate('/')} aria-label="Go to DreamsPOS home">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 sm:h-10 sm:w-10">
             <Store className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -50,10 +51,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         </button>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <button onClick={() => onNavigate('/login')} className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-[11px] font-bold text-slate-200 transition-all hover:border-slate-700 sm:px-4 sm:text-xs">
-            <LogIn className="h-3.5 w-3.5 text-blue-400" />
-            <span>Sign In</span>
-          </button>
+          {!currentUser && (
+            <button onClick={() => onNavigate('/login')} className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-[11px] font-bold text-slate-200 transition-all hover:border-slate-700 sm:px-4 sm:text-xs">
+              <LogIn className="h-3.5 w-3.5 text-blue-400" />
+              <span>Sign In</span>
+            </button>
+          )}
           <button onClick={() => onNavigate('/dashboard')} className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-[11px] font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-500 sm:px-4 sm:text-xs">
             <span className="hidden min-[400px]:inline">Workspace</span>
             <span className="min-[400px]:hidden">Open</span>

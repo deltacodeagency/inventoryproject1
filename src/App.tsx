@@ -115,9 +115,22 @@ const MainAppContent: React.FC = () => {
     else if (path.startsWith('/rep-')) setActiveView(path.slice(1));
   };
 
+  // Redirection logic for Home page based on auth state and screen size
+  useEffect(() => {
+    if (!isAuthLoading && (currentPath === '/' || currentPath === '/home')) {
+      const isMobile = window.innerWidth < 768;
+      
+      if (currentUser) {
+        navigate('/dashboard');
+      } else if (isMobile) {
+        navigate('/login');
+      }
+    }
+  }, [currentPath, currentUser, isAuthLoading]);
+
   // Route 1: Homepage at `/`
   if (currentPath === '/' || currentPath === '/home') {
-    return <HomeView onNavigate={navigate} />;
+    return <HomeView onNavigate={navigate} currentUser={currentUser} />;
   }
 
   // Route 2: Login Page at `/login`
