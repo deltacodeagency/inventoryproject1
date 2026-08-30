@@ -275,31 +275,60 @@ export const SuperAdminView: React.FC = () => {
       </div>
 
       {/* System Audit Log */}
-      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-100 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 min-w-0">
         <div>
           <h4 className="font-bold text-sm text-slate-800">Security & Operational Audit Log</h4>
           <span className="text-[10px] text-slate-400 block -mt-0.5">Immutable records of store interventions</span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile: stacked event cards */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {auditLogs.map((log) => {
+            const when = new Date(log.timestamp);
+            return (
+              <div key={log.id} className="py-3.5 first:pt-0 last:pb-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-800 leading-snug">{log.action}</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-600">{log.user}</p>
+                  </div>
+                  <span className="shrink-0 font-mono text-[10px] text-slate-400 bg-slate-50 border border-slate-100 rounded-md px-1.5 py-0.5">
+                    {log.ip}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400">
+                  <Clock className="w-3 h-3 shrink-0" />
+                  <span>
+                    {when.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {' · '}
+                    {when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                <th className="pb-3">Timestamp</th>
-                <th className="pb-3">Operator</th>
-                <th className="pb-3">Action Event</th>
+                <th className="pb-3 pr-4">Timestamp</th>
+                <th className="pb-3 pr-4">Operator</th>
+                <th className="pb-3 pr-4">Action Event</th>
                 <th className="pb-3 text-right">IP Address</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {auditLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 text-slate-500">
+                  <td className="py-3 pr-4 text-slate-500 whitespace-nowrap">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
-                  <td className="py-3 font-semibold text-slate-700">{log.user}</td>
-                  <td className="py-3 text-slate-800 font-medium">{log.action}</td>
-                  <td className="py-3 text-right font-mono text-slate-400 text-[10px]">{log.ip}</td>
+                  <td className="py-3 pr-4 font-semibold text-slate-700 whitespace-nowrap">{log.user}</td>
+                  <td className="py-3 pr-4 text-slate-800 font-medium">{log.action}</td>
+                  <td className="py-3 text-right font-mono text-slate-400 text-[10px] whitespace-nowrap">{log.ip}</td>
                 </tr>
               ))}
             </tbody>
