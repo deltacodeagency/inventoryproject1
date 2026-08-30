@@ -478,28 +478,34 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [sales, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_purchases', purchases);
-  }, [purchases]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('purchases', purchases);
+  }, [purchases, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_expenses', expenses);
-  }, [expenses]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('expenses', expenses);
+  }, [expenses, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_incomes', incomes);
-  }, [incomes]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('incomes', incomes);
+  }, [incomes, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_returns', returns);
-  }, [returns]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('returns', returns);
+  }, [returns, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_adjustments', adjustments);
-  }, [adjustments]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('adjustments', adjustments);
+  }, [adjustments, neonLoaded]);
 
   useEffect(() => {
-    writeStoredCollection('ims_transfers', transfers);
-  }, [transfers]);
+    if (!neonLoaded) return;
+    void syncCollectionToServer('transfers', transfers);
+  }, [transfers, neonLoaded]);
 
   // Compute stock alerts based on current products list
   useEffect(() => {
@@ -709,6 +715,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (!assertNotSalesman('delete products')) return;
     const prod = products.find((p) => p.id === id);
     setProducts((prev) => prev.filter((p) => p.id !== id));
+    fetch(`/api/data/products/${id}`, { method: 'DELETE' }).catch(console.error);
     if (prod) {
       addAlert('system', 'Product Deleted', `Product ${prod.name} has been removed from inventory.`);
     }
@@ -717,6 +724,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const deleteProducts = (ids: string[]) => {
     if (!assertNotSalesman('delete products')) return;
     setProducts((prev) => prev.filter((p) => !ids.includes(p.id)));
+    ids.forEach(id => fetch(`/api/data/products/${id}`, { method: 'DELETE' }).catch(console.error));
     if (ids.length > 0) {
       addAlert('system', 'Products Deleted', `${ids.length} products have been removed from inventory.`);
     }
@@ -740,6 +748,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const deleteCategory = (id: string) => {
     if (!assertNotSalesman('delete categories')) return;
     setCategories((prev) => prev.filter((cat) => cat.id !== id));
+    fetch(`/api/data/categories/${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
   // Brand CRUD
@@ -760,6 +769,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const deleteBrand = (id: string) => {
     if (!assertNotSalesman('delete brands')) return;
     setBrands((prev) => prev.filter((br) => br.id !== id));
+    fetch(`/api/data/brands/${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
   // Supplier CRUD
@@ -780,6 +790,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const deleteSupplier = (id: string) => {
     if (!assertNotSalesman('delete suppliers')) return;
     setSuppliers((prev) => prev.filter((sup) => sup.id !== id));
+    fetch(`/api/data/suppliers/${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
   // POS CART ACTIONS
@@ -1256,6 +1267,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     setUsers(prev => prev.filter(u => u.id !== userId));
+    fetch(`/api/data/users/${userId}`, { method: 'DELETE' }).catch(console.error);
     addAlert('system', 'User Deleted', `User record removed from store database.`);
   };
 

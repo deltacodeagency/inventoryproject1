@@ -134,6 +134,45 @@ app.get('/api/data/:collection', async (req, res) => {
   }
 });
 
+app.delete('/api/data/:collection/:id', async (req, res) => {
+  try {
+    const { collection, id } = req.params;
+    const models = {
+      users: prisma.user,
+      products: prisma.product,
+      categories: prisma.category,
+      brands: prisma.brand,
+      suppliers: prisma.supplier,
+      sales: prisma.sale,
+      purchases: prisma.purchase,
+      expenses: prisma.expense,
+      incomes: prisma.income,
+      returns: prisma.return,
+      adjustments: prisma.stockAdjustment,
+      transfers: prisma.stockTransfer,
+    };
+    const model = models[collection];
+    if (!model) return res.status(404).json({ ok: false, error: 'Unknown collection' });
+    
+    // For sales, we might need to delete items first, but Prisma might have onDelete cascade
+    // Same for products (batches). Let's assume Prisma handles relations, or we can just try delete
+    try {
+      if (collection === 'products') {
+        await prisma.productBatch.deleteMany({ where: { productId: id } });
+      } else if (collection === 'sales') {
+        await prisma.saleItem.deleteMany({ where: { saleId: id } });
+      }
+      await model.delete({ where: { id } });
+    } catch (e) {
+      // ignore if not found
+    }
+    return res.json({ ok: true, deleted: id });
+  } catch (error) {
+    console.error('Delete error:', error);
+    return res.status(500).json({ ok: false, error: error?.message || 'Database delete failed' });
+  }
+});
+
 app.post('/api/local-auth/login', async (req, res) => {
   try {
     const identity = String(req.body?.identity || '').trim().toLowerCase();
@@ -489,6 +528,90 @@ async function persistCollection(collection, records = []) {
           createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(),
           updatedAt: cleaned.updatedAt ? new Date(cleaned.updatedAt) : new Date(),
         },
+      });
+      continue;
+    }
+
+    if (collection === 'purchases') {
+      await prisma.purchase.upsert({
+        where: { purchaseNo: cleaned.purchaseNo },
+        update: {
+          date: new Date(cleaned.date), supplierId: cleaned.supplierId, supplierName: cleaned.supplierName,
+          total: Number(cleaned.total || 0), status: cleaned.status, updatedAt: new Date(),
+        },
+        create: {
+          id: cleaned.id, purchaseNo: cleaned.purchaseNo, date: new Date(cleaned.date),
+          supplierId: cleaned.supplierId, supplierName: cleaned.supplierName, total: Number(cleaned.total || 0),
+          status: cleaned.status, createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date(),
+        }
+      });
+      const purchase = await prisma.purchase.findUniqueOrThrow({ where: { purchaseNo: cleaned.purchaseNo } });
+      await prisma.purchaseItem.deleteMany({ where: { purchaseId: purchase.id } });
+      if (Array.isArray(cleaned.items) && cleaned.items.length) {
+        await prisma.purchaseItem.createMany({ data: cleaned.items.map((item) => ({
+          id: item.id || `${purchase.id}-${item.productId}`, purchaseId: purchase.id, productId: item.productId,
+          productName: item.productName, quantity: Number(item.quantity || 0), cost: Number(item.cost || 0),
+        })) });
+      }
+      continue;
+    }
+
+    if (collection === 'returns') {
+      await prisma.return.upsert({
+        where: { returnNo: cleaned.returnNo },
+        update: {
+          saleId: cleaned.saleId, invoiceNo: cleaned.invoiceNo, date: new Date(cleaned.date),
+          refundTotal: Number(cleaned.refundTotal || 0), reason: cleaned.reason || '', updatedAt: new Date(),
+        },
+        create: {
+          id: cleaned.id, returnNo: cleaned.returnNo, saleId: cleaned.saleId, invoiceNo: cleaned.invoiceNo,
+          date: new Date(cleaned.date), refundTotal: Number(cleaned.refundTotal || 0), reason: cleaned.reason || '',
+          createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date(),
+        }
+      });
+      const ret = await prisma.return.findUniqueOrThrow({ where: { returnNo: cleaned.returnNo } });
+      await prisma.returnItem.deleteMany({ where: { returnId: ret.id } });
+      if (Array.isArray(cleaned.items) && cleaned.items.length) {
+        await prisma.returnItem.createMany({ data: cleaned.items.map((item) => ({
+          id: item.id || `${ret.id}-${item.productId}`, returnId: ret.id, productId: item.productId,
+          productName: item.productName, quantity: Number(item.quantity || 0), refundAmount: Number(item.refundAmount || 0),
+        })) });
+      }
+      continue;
+    }
+
+    if (collection === 'expenses') {
+      await prisma.expense.upsert({
+        where: { id: cleaned.id },
+        update: { category: cleaned.category, amount: Number(cleaned.amount || 0), date: new Date(cleaned.date), description: cleaned.description, updatedAt: new Date() },
+        create: { id: cleaned.id, category: cleaned.category, amount: Number(cleaned.amount || 0), date: new Date(cleaned.date), description: cleaned.description, createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date() },
+      });
+      continue;
+    }
+
+    if (collection === 'incomes') {
+      await prisma.income.upsert({
+        where: { id: cleaned.id },
+        update: { category: cleaned.category, amount: Number(cleaned.amount || 0), date: new Date(cleaned.date), description: cleaned.description, updatedAt: new Date() },
+        create: { id: cleaned.id, category: cleaned.category, amount: Number(cleaned.amount || 0), date: new Date(cleaned.date), description: cleaned.description, createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date() },
+      });
+      continue;
+    }
+
+    if (collection === 'adjustments') {
+      await prisma.stockAdjustment.upsert({
+        where: { id: cleaned.id },
+        update: { productId: cleaned.productId, productName: cleaned.productName, sku: cleaned.sku, type: cleaned.type, quantity: Number(cleaned.quantity || 0), reason: cleaned.reason, notes: cleaned.notes, date: new Date(cleaned.date), adjustedBy: cleaned.adjustedBy, cost: cleaned.cost == null ? null : Number(cleaned.cost), price: cleaned.price == null ? null : Number(cleaned.price), updatedAt: new Date() },
+        create: { id: cleaned.id, productId: cleaned.productId, productName: cleaned.productName, sku: cleaned.sku, type: cleaned.type, quantity: Number(cleaned.quantity || 0), reason: cleaned.reason, notes: cleaned.notes, date: new Date(cleaned.date), adjustedBy: cleaned.adjustedBy, cost: cleaned.cost == null ? null : Number(cleaned.cost), price: cleaned.price == null ? null : Number(cleaned.price), createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date() },
+      });
+      continue;
+    }
+
+    if (collection === 'transfers') {
+      await prisma.stockTransfer.upsert({
+        where: { transferNo: cleaned.transferNo },
+        update: { productId: cleaned.productId, productName: cleaned.productName, sku: cleaned.sku, quantity: Number(cleaned.quantity || 0), sourceLocation: cleaned.sourceLocation, destinationLocation: cleaned.destinationLocation, status: cleaned.status, date: new Date(cleaned.date), updatedAt: new Date() },
+        create: { id: cleaned.id, transferNo: cleaned.transferNo, productId: cleaned.productId, productName: cleaned.productName, sku: cleaned.sku, quantity: Number(cleaned.quantity || 0), sourceLocation: cleaned.sourceLocation, destinationLocation: cleaned.destinationLocation, status: cleaned.status, date: new Date(cleaned.date), createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date() },
       });
       continue;
     }

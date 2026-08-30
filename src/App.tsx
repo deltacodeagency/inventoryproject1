@@ -176,7 +176,7 @@ const MainAppContent: React.FC = () => {
           className: 'rounded-xl border border-slate-200 bg-white text-slate-700 shadow-xl'
         }}
       />
-      <div className="flex h-screen bg-[#f4f7fb] dark:bg-[#f4f7fb] font-sans text-[#334155] dark:text-slate-100 overflow-hidden">
+      <div className="flex h-[100dvh] bg-[#f4f7fb] dark:bg-[#f4f7fb] font-sans text-[#334155] dark:text-slate-100 overflow-hidden">
         {/* Drawer Sidebar */}
         <Sidebar onNavigate={navigate} />
 
@@ -186,7 +186,7 @@ const MainAppContent: React.FC = () => {
         <Header />
 
         {/* Content View Body */}
-        <main className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100vh-96px)] lg:max-h-[calc(100vh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
+        <main className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100dvh-96px)] lg:max-h-[calc(100dvh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
           <div className={`max-w-7xl mx-auto w-full ${activeView === 'pos' ? 'lg:flex-1 lg:flex lg:flex-col lg:min-h-0 lg:h-full pb-16 lg:pb-0' : 'pb-16 md:pb-0'}`}>
             {renderView()}
           </div>
