@@ -43,26 +43,17 @@ const MainAppContent: React.FC = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (mainRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = mainRef.current;
-        setShowScrollTop(scrollTop > 200);
-        
-        const scrollableHeight = scrollHeight - clientHeight;
-        if (scrollableHeight > 0) {
-          setScrollProgress((scrollTop / scrollableHeight) * 100);
-        } else {
-          setScrollProgress(0);
-        }
-      }
-    };
-    const mainEl = mainRef.current;
-    if (mainEl) {
-      mainEl.addEventListener('scroll', handleScroll);
-      return () => mainEl.removeEventListener('scroll', handleScroll);
+  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    setShowScrollTop(scrollTop > 100);
+    
+    const scrollableHeight = scrollHeight - clientHeight;
+    if (scrollableHeight > 0) {
+      setScrollProgress((scrollTop / scrollableHeight) * 100);
+    } else {
+      setScrollProgress(0);
     }
-  }, []);
+  };
 
   const scrollToTop = () => {
     if (mainRef.current) {
@@ -221,6 +212,15 @@ const MainAppContent: React.FC = () => {
         return <POSView />;
       case 'profile':
         return <ProfileView />;
+      case 'rep-sales':
+      case 'rep-purchase':
+      case 'rep-inventory':
+      case 'rep-supplier':
+      case 'rep-product':
+      case 'rep-income':
+      case 'rep-expense':
+      case 'rep-annual':
+        return <ReportsView />;
       default:
         return <DashboardView />;
     }
@@ -245,7 +245,7 @@ const MainAppContent: React.FC = () => {
         <Header />
 
         {/* Content View Body */}
-        <main ref={mainRef} className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100dvh-96px)] lg:max-h-[calc(100dvh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
+        <main ref={mainRef} onScroll={handleScroll} className={`flex-1 ${activeView === 'pos' ? 'lg:h-[calc(100dvh-96px)] lg:max-h-[calc(100dvh-96px)] overflow-y-auto lg:overflow-hidden lg:flex lg:flex-col lg:min-h-0 p-4 md:p-6' : 'overflow-y-auto p-4 md:p-8'}`}>
           <div className={`max-w-7xl mx-auto w-full ${activeView === 'pos' ? 'lg:flex-1 lg:flex lg:flex-col lg:min-h-0 lg:h-full pb-16 lg:pb-0' : 'pb-16 md:pb-0'}`}>
             {renderView()}
           </div>
