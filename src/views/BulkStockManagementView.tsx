@@ -22,6 +22,27 @@ export const BulkStockManagementView: React.FC = () => {
     setQuantities((current) => ({ ...current, [productId]: current[productId] || 1 }));
   };
 
+  const handleCardClick = (productId: string) => {
+    setSelectedIds((current) => {
+      if (!current.includes(productId)) return [...current, productId];
+      return current;
+    });
+    setQuantities((current) => ({
+      ...current,
+      [productId]: (current[productId] || 0) + 1
+    }));
+  };
+
+  const handleDecrement = (productId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentQty = quantities[productId] || 1;
+    if (currentQty <= 1) {
+      setSelectedIds((current) => current.filter((id) => id !== productId));
+    } else {
+      setQuantities((current) => ({ ...current, [productId]: currentQty - 1 }));
+    }
+  };
+
   const toggleAll = () => {
     if (allSelected) {
       setSelectedIds([]);
@@ -129,11 +150,29 @@ export const BulkStockManagementView: React.FC = () => {
               const selected = selectedIds.includes(product.id);
               if (viewMode === 'grid') {
                 return (
-                  <div key={product.id} onClick={() => toggleProduct(product.id)} className={`rounded-xl p-2.5 text-left shadow-sm transition-all flex flex-col justify-between relative cursor-pointer border ${selected ? 'bg-blue-50/50 border-2 border-blue-400' : 'bg-white border-slate-100 hover:border-blue-200'}`}>
-                    <div className="absolute top-2 left-2 z-10">
-                      <input type="checkbox" checked={selected} onClick={(e) => e.stopPropagation()} onChange={() => toggleProduct(product.id)} className="h-3.5 w-3.5 accent-blue-600" aria-label={`Select ${product.name}`} />
-                    </div>
-                    <div className="mb-2 relative rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center aspect-square mt-3">
+                  <div key={product.id} onClick={() => handleCardClick(product.id)} className={`rounded-xl p-2.5 text-left shadow-sm transition-all flex flex-col justify-between relative cursor-pointer border ${selected ? 'bg-blue-50/50 border-2 border-blue-400' : 'bg-white border-slate-100 hover:border-blue-200'}`}>
+                    {selected && (
+                      <div className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm z-10 flex items-center space-x-1">
+                        <Package className="w-2.5 h-2.5" />
+                        <span>{quantities[product.id] || 1} adjusted</span>
+                      </div>
+                    )}
+                    {selected ? (
+                      <div className="absolute top-2 right-2 flex items-center bg-white border border-blue-300 rounded-xl p-0.5 shadow-md z-20 space-x-0.5" onClick={(e) => e.stopPropagation()}>
+                        <button type="button" onClick={(e) => handleDecrement(product.id, e)} className="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors cursor-pointer font-black border border-rose-200">
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-5 text-center font-black text-xs text-blue-700">{quantities[product.id] || 1}</span>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); handleCardClick(product.id); }} className="w-6 h-6 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors cursor-pointer font-black border border-blue-700">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="absolute top-2 right-2 z-10">
+                        <input type="checkbox" checked={selected} onClick={(e) => e.stopPropagation()} onChange={() => toggleProduct(product.id)} className="h-4 w-4 accent-blue-600 cursor-pointer" aria-label={`Select ${product.name}`} />
+                      </div>
+                    )}
+                    <div className="mb-2 relative rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center aspect-square mt-5">
                       {product.image ? <img src={product.image} alt="" className="w-full h-full object-cover" /> : <Package className="w-8 h-8 text-slate-300" />}
                     </div>
                     <div>
