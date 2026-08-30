@@ -41,8 +41,12 @@ const MainAppContent: React.FC = () => {
 
   // Scroll to top on route change
   useEffect(() => {
-    if (mainRef.current) {
-      mainRef.current.scrollTo(0, 0);
+    try {
+      if (mainRef.current && typeof mainRef.current.scrollTo === 'function') {
+        mainRef.current.scrollTo(0, 0);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }, [activeView, currentPath]);
 
@@ -79,15 +83,6 @@ const MainAppContent: React.FC = () => {
     const view = currentPath.startsWith('/rep-') ? currentPath.slice(1) : viewByPath[currentPath];
     if (view) setActiveView(view);
   }, [currentPath, setActiveView]);
-
-  // Keep the login fallback from flashing while Better Auth restores an OAuth session.
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-slate-700 border-t-blue-500 animate-spin" aria-label="Loading" />
-      </div>
-    );
-  }
 
   // Navigation router helper
   const navigate = (path: string) => {
@@ -127,6 +122,15 @@ const MainAppContent: React.FC = () => {
       }
     }
   }, [currentPath, currentUser, isAuthLoading]);
+
+  // Keep the login fallback from flashing while Better Auth restores an OAuth session.
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-slate-700 border-t-blue-500 animate-spin" aria-label="Loading" />
+      </div>
+    );
+  }
 
   // Route 1: Homepage at `/`
   if (currentPath === '/' || currentPath === '/home') {
