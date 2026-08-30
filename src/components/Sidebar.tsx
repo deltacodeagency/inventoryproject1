@@ -118,7 +118,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         { id: 'rep-supplier', label: 'Supplier Report', icon: Truck },
         { id: 'rep-product', label: 'Product Report', icon: Boxes },
         { id: 'rep-income', label: 'Income Report', icon: TakaIcon },
-        { id: 'rep-expense', label: 'Expense Report', icon: FileText },
         { id: 'rep-annual', label: 'Annual Report', icon: Calendar },
       ],
     },
