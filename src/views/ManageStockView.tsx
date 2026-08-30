@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import Swal from 'sweetalert2';
 import { AppSelect } from '../components/AppSelect';
 import {
   Search,
@@ -150,7 +151,7 @@ export const ManageStockView: React.FC = () => {
 
     if (selectedProducts.length === 0 || bulkQty <= 0) return;
     if (currentUser?.role === 'Salesman') {
-      alert('Permission Denied: Salesmen are not authorized to adjust stock.');
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Salesmen are not authorized to adjust stock.', confirmButtonColor: '#2563eb' });
       return;
     }
 

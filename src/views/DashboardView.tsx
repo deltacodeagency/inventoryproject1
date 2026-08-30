@@ -29,7 +29,8 @@ export const DashboardView: React.FC = () => {
     setActiveView,
     updateProduct,
     addAlert,
-    users
+    users,
+    currentUser
   } = useInventory();
 
   // Interactive filters state
@@ -490,20 +491,22 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Profit */}
-        <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Profit</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(profitVal).toLocaleString()}</h3>
-            <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
-              <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
-              <span className="truncate">Net Income Calc</span>
-            </span>
+        {currentUser?.role !== 'Salesman' && (
+          <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Profit</span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(profitVal).toLocaleString()}</h3>
+              <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
+                <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
+                <span className="truncate">Net Income Calc</span>
+              </span>
+            </div>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 z-10 shadow-inner">
+              <TakaIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
           </div>
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 z-10 shadow-inner">
-            <TakaIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
-        </div>
+        )}
       </div>
 
       {/* SECTION 2: Row 1 — Sales & Purchase */}
@@ -559,7 +562,7 @@ export const DashboardView: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className={`grid grid-cols-1 gap-3 ${currentUser?.role === 'Salesman' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
             <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl">
               <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wide">Sales</span>
               <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchasePeriodSum.sales.toLocaleString()}</h3>
@@ -570,11 +573,13 @@ export const DashboardView: React.FC = () => {
               <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchasePeriodSum.purchases.toLocaleString()}</h3>
               <span className="text-[11px] text-slate-500">Supplier orders and restock spend.</span>
             </div>
-            <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl">
-              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wide">Profit</span>
-              <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchaseProfit.toLocaleString()}</h3>
-              <span className="text-[11px] text-slate-500">Sales minus purchases for selected range.</span>
-            </div>
+            {currentUser?.role !== 'Salesman' && (
+              <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl">
+                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wide">Profit</span>
+                <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchaseProfit.toLocaleString()}</h3>
+                <span className="text-[11px] text-slate-500">Sales minus purchases for selected range.</span>
+              </div>
+            )}
           </div>
 
           {salesPurchaseRange === '1M' ? (

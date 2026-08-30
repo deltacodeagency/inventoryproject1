@@ -180,7 +180,7 @@ export const Header: React.FC = () => {
           return false;
         }
         if (currentUser?.role === 'Salesman') {
-          const salesmanAllowed = ['dashboard', 'pos', 'return', 'invoice', 'products', 'profile'];
+          const salesmanAllowed = ['dashboard', 'pos', 'invoice', 'products', 'profile'];
           if (!salesmanAllowed.includes(item.id)) return false;
         }
         return (

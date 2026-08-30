@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useInventory } from '../context/InventoryContext';
 import { uploadImageToImgBB } from '../lib/image-upload';
+import Swal from 'sweetalert2';
 import { AppSelect } from '../components/AppSelect';
 import {
   RotateCw,
@@ -420,24 +421,26 @@ export const CreateProductView: React.FC = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles: File[] = Array.from(e.target.files || []);
     if (selectedFiles.length === 0) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     // This form supports one product photo. Keep the input ready for the
     // next selection even when the same file is chosen again.
     e.target.value = '';
 
-    const oversizedFile = selectedFiles.find((file) => file.size > 8 * 1024 * 1024);
+    const oversizedFile = Array.from(files as FileList).find((f: File) => f.size > 8 * 1024 * 1024);
     if (oversizedFile) {
-      alert(`Image "${oversizedFile.name}" is too large. Please select images under 8MB.`);
-      e.target.value = '';
+      Swal.fire({ icon: 'error', title: 'File Too Large', text: `Image "${oversizedFile.name}" is too large. Please select images under 8MB.`, confirmButtonColor: '#2563eb' });
       return;
     }
 
     setIsUploadingImages(true);
     try {
-      const newImageURL = await uploadImageToImgBB(selectedFiles[0]);
-      setImages([newImageURL]);
+      const imageUrl = await uploadImageToImgBB(files[0]);
+      setImages([imageUrl]);
     } catch (uploadError) {
-      alert(uploadError instanceof Error ? uploadError.message : 'Unable to upload product image.');
+      console.error('Image upload failed:', uploadError);
+      Swal.fire({ icon: 'error', title: 'Upload Failed', text: uploadError instanceof Error ? uploadError.message : 'Unable to upload product image.', confirmButtonColor: '#2563eb' });
     } finally {
       setIsUploadingImages(false);
     }
@@ -476,7 +479,7 @@ export const CreateProductView: React.FC = () => {
     e.preventDefault();
     if (!editingProduct) return;
     if (quickAdjustQty <= 0) {
-      alert('Adjustment quantity must be greater than 0.');
+      Swal.fire({ icon: 'error', title: 'Invalid Quantity', text: 'Adjustment quantity must be greater than 0.', confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -507,20 +510,20 @@ export const CreateProductView: React.FC = () => {
   // Main Submit Handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-     if (!name.trim()) {
-      alert('Product Name is required.');
+    if (!name.trim()) {
+      Swal.fire({ icon: 'error', title: 'Missing Field', text: 'Product Name is required.', confirmButtonColor: '#2563eb' });
       return;
     }
     if (!categoryId) {
-      alert('Category is required.');
+      Swal.fire({ icon: 'error', title: 'Missing Field', text: 'Category is required.', confirmButtonColor: '#2563eb' });
       return;
     }
     if (!brandId) {
-      alert('Brand is required.');
+      Swal.fire({ icon: 'error', title: 'Missing Field', text: 'Brand is required.', confirmButtonColor: '#2563eb' });
       return;
     }
     if (!supplierId) {
-      alert('Supplier is required.');
+      Swal.fire({ icon: 'error', title: 'Missing Field', text: 'Supplier is required.', confirmButtonColor: '#2563eb' });
       return;
     }
 

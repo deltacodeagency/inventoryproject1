@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory, ensureProductBatches } from '../context/InventoryContext';
+import Swal from 'sweetalert2';
 import {
   TrendingUp,
   Boxes,
@@ -34,7 +35,7 @@ export const ReportsView: React.FC = () => {
     setExporting(true);
     setTimeout(() => {
       setExporting(false);
-      alert(`Report exported successfully as ${format.toUpperCase()}!`);
+      Swal.fire({ icon: 'success', title: 'Export Complete', text: `Report exported successfully as ${format.toUpperCase()}!`, confirmButtonColor: '#2563eb' });
     }, 1500);
   };
 

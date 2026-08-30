@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, ProductBatch, Category, Brand, Supplier, Sale, Purchase, Expense, Income, Alert, Return, ReturnItem, StockAdjustment, StockTransfer, User } from '../types';
 import { signOut, useSession } from '../lib/auth-client';
-
+import Swal from 'sweetalert2';
 interface CartItem {
   product: Product;
   quantity: number;
@@ -567,7 +567,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const assertNotSalesman = (actionName: string): boolean => {
     if (currentUser?.role === 'Salesman') {
-      alert(`Access Denied: Salesmen are not authorized to ${actionName}.`);
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: `Access Denied: Salesmen are not authorized to ${actionName}.`, confirmButtonColor: '#2563eb' });
       return false;
     }
     return true;
@@ -1207,11 +1207,11 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const registerUser = (fullName: string, username: string, email: string, password?: string, role?: 'Administrator' | 'Manager' | 'Salesman'): User | null => {
     if (currentUser?.role === 'Salesman') {
-      alert('Permission Denied: Salesmen are not authorized to register users.');
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Salesmen are not authorized to register users.', confirmButtonColor: '#2563eb' });
       return null;
     }
     if (currentUser?.role === 'Manager' && role === 'Administrator') {
-      alert('Permission Denied: Managers cannot register Administrator accounts.');
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Managers cannot register Administrator accounts.', confirmButtonColor: '#2563eb' });
       return null;
     }
 
@@ -1251,18 +1251,17 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const deleteUser = (userId: string) => {
-    if (currentUser?.id === userId) {
-      alert('Cannot delete currently logged-in user!');
+  const deleteUser = (userId: string) => {    if (currentUser?.id === userId) {
+      Swal.fire({ icon: 'error', title: 'Action Denied', text: 'Cannot delete currently logged-in user!', confirmButtonColor: '#2563eb' });
       return;
     }
     if (currentUser?.role === 'Salesman') {
-      alert('Permission Denied: Salesmen cannot delete users.');
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Salesmen cannot delete users.', confirmButtonColor: '#2563eb' });
       return;
     }
-    const targetUser = users.find(u => u.id === userId);
-    if (currentUser?.role === 'Manager' && targetUser?.role === 'Administrator') {
-      alert('Permission Denied: Managers cannot delete Administrator accounts.');
+    const userToDelete = users.find(u => u.id === userId);
+    if (currentUser?.role === 'Manager' && userToDelete?.role === 'Administrator') {
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Managers cannot delete Administrator accounts.', confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -1273,7 +1272,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const updateUserRole = (userId: string, role: 'Administrator' | 'Manager' | 'Salesman') => {
     if (currentUser?.role === 'Salesman') {
-      alert('Permission Denied: Salesmen cannot modify user roles.');
+      Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Salesmen cannot modify user roles.', confirmButtonColor: '#2563eb' });
       return;
     }
     const targetUser = users.find(u => u.id === userId);
@@ -1281,11 +1280,11 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     if (currentUser?.role === 'Manager') {
       if (targetUser.role === 'Administrator') {
-        alert('Permission Denied: Managers cannot change the Administrator role.');
+        Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Managers cannot change the Administrator role.', confirmButtonColor: '#2563eb' });
         return;
       }
       if (role === 'Administrator') {
-        alert('Permission Denied: Managers cannot promote accounts to Administrator.');
+        Swal.fire({ icon: 'error', title: 'Permission Denied', text: 'Managers cannot promote accounts to Administrator.', confirmButtonColor: '#2563eb' });
         return;
       }
     }

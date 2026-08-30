@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { confirmToast } from '../lib/confirmToast';
+import Swal from 'sweetalert2';
 import {
   Boxes,
   Plus,
@@ -133,13 +134,13 @@ export const ProductsView: React.FC = () => {
       : filteredProducts;
 
     if (productsToExport.length === 0) {
-      alert('No products available to export.');
+      Swal.fire({ icon: 'warning', title: 'Export Failed', text: 'No products available to export.', confirmButtonColor: '#2563eb' });
       return;
     }
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Please allow popups to export PDF');
+      Swal.fire({ icon: 'error', title: 'Popup Blocked', text: 'Please allow popups to export PDF', confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -505,7 +506,7 @@ export const ProductsView: React.FC = () => {
       : filteredProducts;
 
     if (productsToExport.length === 0) {
-      alert('No products available to export.');
+      Swal.fire({ icon: 'warning', title: 'Export Failed', text: 'No products available to export.', confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -660,7 +661,7 @@ export const ProductsView: React.FC = () => {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Failed to generate Excel sample file:', err);
-      alert('Failed to generate Excel sample file. Please try again.');
+      Swal.fire({ icon: 'error', title: 'Download Failed', text: 'Failed to generate Excel sample file. Please try again.', confirmButtonColor: '#2563eb' });
     }
   };
 
@@ -1094,120 +1095,123 @@ export const ProductsView: React.FC = () => {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* Column Settings Toggle Button */}
-          <div ref={columnToggleRef} className="relative">
-            <button
-              onClick={() => {
-                if (!showColumnDropdown && columnToggleRef.current) {
-                  const rect = columnToggleRef.current.getBoundingClientRect();
-                  const width = Math.min(224, window.innerWidth - 24);
-                  const left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12);
-                  setColumnMenuPosition({ top: rect.bottom + 8, left, width });
-                }
-                setShowColumnDropdown(!showColumnDropdown);
-              }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-sm active:scale-95 ${
-                showColumnDropdown 
-                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-              title="Toggle Columns for Export"
-            >
-              <SlidersHorizontal className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-            </button>
-            
-            {showColumnDropdown && (
-              <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowColumnDropdown(false)}
-                />
-                <div
-                  style={columnMenuPosition ? {
-                    '--export-columns-top': `${columnMenuPosition.top}px`,
-                    '--export-columns-left': `${columnMenuPosition.left}px`,
-                    '--export-columns-width': `${columnMenuPosition.width}px`,
-                  } as React.CSSProperties : undefined}
-                  className="export-columns-menu absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] bg-white border border-slate-200 rounded-xl shadow-xl p-4 z-20 animate-fade-in text-xs space-y-3"
+          {currentUser?.role !== 'Salesman' && (
+            <>
+              {/* Column Settings Toggle Button */}
+              <div ref={columnToggleRef} className="relative">
+                <button
+                  onClick={() => {
+                    if (!showColumnDropdown && columnToggleRef.current) {
+                      const rect = columnToggleRef.current.getBoundingClientRect();
+                      const width = Math.min(224, window.innerWidth - 24);
+                      const left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12);
+                      setColumnMenuPosition({ top: rect.bottom + 8, left, width });
+                    }
+                    setShowColumnDropdown(!showColumnDropdown);
+                  }}
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-sm active:scale-95 ${
+                    showColumnDropdown 
+                      ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                  title="Toggle Columns for Export"
                 >
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
-                    <span className="font-bold text-slate-700">Export Columns</span>
-                    <button 
-                      onClick={() => {
-                        setVisibleColumns({
-                          sku: true,
-                          name: true,
-                          category: true,
-                          brand: true,
-                          supplier: true,
-                          price: true,
-                          cost: true,
-                          stock: true,
-                        });
-                      }}
-                      className="text-[10px] text-blue-600 hover:text-blue-800 font-bold"
+                  <SlidersHorizontal className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </button>
+                
+                {showColumnDropdown && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowColumnDropdown(false)}
+                    />
+                    <div
+                      style={columnMenuPosition ? {
+                        '--export-columns-top': `${columnMenuPosition.top}px`,
+                        '--export-columns-left': `${columnMenuPosition.left}px`,
+                        '--export-columns-width': `${columnMenuPosition.width}px`,
+                      } as React.CSSProperties : undefined}
+                      className="export-columns-menu absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] bg-white border border-slate-200 rounded-xl shadow-xl p-4 z-20 animate-fade-in text-xs space-y-3"
                     >
-                      Reset
-                    </button>
-                  </div>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {(['sku', 'name', 'category', 'brand', 'supplier', 'price', 'cost', 'stock'] as const).map((colKey) => {
-                      const labelMap: Record<string, string> = {
-                        sku: 'SKU Code',
-                        name: 'Product Name',
-                        category: 'Category',
-                        brand: 'Brand',
-                        supplier: 'Supplier',
-                        price: 'Retail Price',
-                        cost: 'Cost Price',
-                        stock: 'Stock Qty',
-                      };
-                      return (
-                        <label key={colKey} className="flex items-center space-x-2.5 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns[colKey]}
-                            onChange={(e) => {
-                              setVisibleColumns(prev => ({
-                                ...prev,
-                                [colKey]: e.target.checked
-                              }));
-                            }}
-                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 accent-blue-600 cursor-pointer"
-                          />
-                          <span className="font-medium text-slate-600">{labelMap[colKey]}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
+                        <span className="font-bold text-slate-700">Export Columns</span>
+                        <button 
+                          onClick={() => {
+                            setVisibleColumns({
+                              sku: true,
+                              name: true,
+                              category: true,
+                              brand: true,
+                              supplier: true,
+                              price: true,
+                              cost: true,
+                              stock: true,
+                            });
+                          }}
+                          className="text-[10px] text-blue-600 hover:text-blue-800 font-bold"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {(['sku', 'name', 'category', 'brand', 'supplier', 'price', 'cost', 'stock'] as const).map((colKey) => {
+                          const labelMap: Record<string, string> = {
+                            sku: 'SKU Code',
+                            name: 'Product Name',
+                            category: 'Category',
+                            brand: 'Brand',
+                            supplier: 'Supplier',
+                            price: 'Retail Price',
+                            cost: 'Cost Price',
+                            stock: 'Stock Qty',
+                          };
+                          return (
+                            <label key={colKey} className="flex items-center space-x-2.5 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={visibleColumns[colKey]}
+                                onChange={(e) => {
+                                  setVisibleColumns(prev => ({
+                                    ...prev,
+                                    [colKey]: e.target.checked
+                                  }));
+                                }}
+                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 accent-blue-600 cursor-pointer"
+                              />
+                              <span className="font-medium text-slate-600">{labelMap[colKey]}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* PDF Export Button */}
+              <button
+                onClick={handleExportPDF}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Export to PDF"
+              >
+                <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="3" width="18" height="18" rx="3.5" fill="#ef4444" />
+                  <text x="12" y="14.5" fill="white" fontSize="6.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">PDF</text>
+                </svg>
+              </button>
 
-          {/* PDF Export Button */}
-          <button
-            onClick={handleExportPDF}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer shadow-sm active:scale-95"
-            title="Export to PDF"
-          >
-            <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="3.5" fill="#ef4444" />
-              <text x="12" y="14.5" fill="white" fontSize="6.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">PDF</text>
-            </svg>
-          </button>
-
-          {/* Excel Export Button */}
-          <button
-            onClick={handleExportExcel}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer shadow-sm active:scale-95"
-            title="Export to Excel"
-          >
-            <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="3.5" fill="#10b981" />
-              <text x="12" y="14.5" fill="white" fontSize="6.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">XLS</text>
-            </svg>
-          </button>
+              {/* Excel Export Button */}
+              <button
+                onClick={handleExportExcel}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Export to Excel"
+              >
+                <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="3" width="18" height="18" rx="3.5" fill="#10b981" />
+                  <text x="12" y="14.5" fill="white" fontSize="6.5" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">XLS</text>
+                </svg>
+              </button>
+            </>
+          )}
 
           {currentUser?.role !== 'Salesman' && (
             <button
@@ -1484,7 +1488,9 @@ export const ProductsView: React.FC = () => {
                         <div className="mt-2 pt-2 border-t border-slate-100/80 space-y-1.5">
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-extrabold text-slate-800">৳{p.price.toFixed(0)}</span>
-                            <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{p.cost.toFixed(0)}</span>
+                            {currentUser?.role !== 'Salesman' && (
+                              <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{p.cost.toFixed(0)}</span>
+                            )}
                           </div>
 
                           <div className="flex justify-between items-center text-[10px]">
@@ -1581,7 +1587,9 @@ export const ProductsView: React.FC = () => {
                   <th className="p-4">Category</th>
                   <th className="p-4">Brand</th>
                   <th className="p-4 text-left">Price</th>
-                  <th className="p-4 text-left">Cost</th>
+                  {currentUser?.role !== 'Salesman' && (
+                    <th className="p-4 text-left">Cost</th>
+                  )}
                   <th className="p-4 text-center">Stock Level</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -1589,7 +1597,7 @@ export const ProductsView: React.FC = () => {
               <tbody className="divide-y divide-slate-50">
                 {paginatedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-12 text-center text-slate-400">
+                    <td colSpan={currentUser?.role === 'Salesman' ? 7 : 8} className="p-12 text-center text-slate-400">
                       <Boxes className="w-8 h-8 text-slate-200 mx-auto mb-2" />
                       <p className="text-xs">No matching products found.</p>
                     </td>
@@ -1660,7 +1668,9 @@ export const ProductsView: React.FC = () => {
                         <td className="p-4 text-left font-bold text-slate-800">৳{p.price.toFixed(0)}</td>
 
                         {/* Supplier Cost */}
-                        <td className="p-4 text-left font-medium text-slate-400">৳{p.cost.toFixed(0)}</td>
+                        {currentUser?.role !== 'Salesman' && (
+                          <td className="p-4 text-left font-medium text-slate-400">৳{p.cost.toFixed(0)}</td>
+                        )}
 
                         {/* Real-time Stock level */}
                         <td className="p-4">

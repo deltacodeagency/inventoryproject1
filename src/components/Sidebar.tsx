@@ -162,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
             
             // Salesman only accesses specific viewpoints (including products list)
             if (currentUser.role === 'Salesman') {
-              const allowedIds = ['dashboard', 'pos', 'return', 'invoice', 'products'];
+              const allowedIds = ['dashboard', 'pos', 'invoice', 'products'];
               return allowedIds.includes(item.id);
             }
             return true;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import Swal from 'sweetalert2';
 import { AppSelect } from '../components/AppSelect';
 import {
   ArrowLeftRight,
@@ -41,7 +42,7 @@ export const StockTransferView: React.FC = () => {
     e.preventDefault();
     if (!selectedProductId || quantity <= 0) return;
     if (sourceLocation === destinationLocation) {
-      alert('Source and Destination locations must be different!');
+      Swal.fire({ icon: 'error', title: 'Invalid Location', text: 'Source and Destination locations must be different!', confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -50,7 +51,7 @@ export const StockTransferView: React.FC = () => {
 
     // Check if source is Downtown Store and they have enough stock to transfer out
     if (sourceLocation === 'Downtown Store' && prod.stock < quantity) {
-      alert(`Cannot transfer ${quantity} units. Only ${prod.stock} units are currently available in Downtown Store!`);
+      Swal.fire({ icon: 'error', title: 'Insufficient Stock', text: `Cannot transfer ${quantity} units. Only ${prod.stock} units are currently available in Downtown Store!`, confirmButtonColor: '#2563eb' });
       return;
     }
 
@@ -364,7 +365,7 @@ export const StockTransferView: React.FC = () => {
                                 // Check if source has enough stock for final delivery approval
                                 const prod = products.find((p) => p.sku === trf.sku);
                                 if (trf.sourceLocation === 'Downtown Store' && prod && prod.stock < trf.quantity) {
-                                  alert(`Local stock count is insufficient to fulfill this dispatch! (${prod.stock} units left, needs ${trf.quantity})`);
+                                  Swal.fire({ icon: 'error', title: 'Insufficient Stock', text: `Local stock count is insufficient to fulfill this dispatch! (${prod.stock} units left, needs ${trf.quantity})`, confirmButtonColor: '#2563eb' });
                                   return;
                                 }
                                 updateStockTransferStatus(trf.id, 'Completed');
