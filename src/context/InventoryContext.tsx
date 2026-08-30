@@ -1312,7 +1312,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         adjustments,
         transfers,
         currentUser,
-        isAuthLoading: isAuthSessionPending || !isAuthInitialized,
+        isAuthLoading: !isAuthInitialized,
         users,
         loginUser,
         registerUser,
