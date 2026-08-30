@@ -10,7 +10,7 @@ import {
   Layers,
   User,
   LogOut,
-  ArrowUp
+  ChevronUp
 } from 'lucide-react';
 import { TakaIcon } from './components/TakaIcon';
 import { HomeView } from './views/HomeView';
@@ -41,11 +41,20 @@ const MainAppContent: React.FC = () => {
   });
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       if (mainRef.current) {
-        setShowScrollTop(mainRef.current.scrollTop > 200);
+        const { scrollTop, scrollHeight, clientHeight } = mainRef.current;
+        setShowScrollTop(scrollTop > 200);
+        
+        const scrollableHeight = scrollHeight - clientHeight;
+        if (scrollableHeight > 0) {
+          setScrollProgress((scrollTop / scrollableHeight) * 100);
+        } else {
+          setScrollProgress(0);
+        }
       }
     };
     const mainEl = mainRef.current;
@@ -324,12 +333,23 @@ const MainAppContent: React.FC = () => {
       {/* Scroll to top FAB */}
       <button
         onClick={scrollToTop}
-        className={`fixed z-50 p-3 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all duration-300 md:bottom-8 md:right-8 bottom-20 right-4 ${
+        className={`fixed z-50 flex items-center justify-center rounded-full bg-slate-900 text-white shadow-lg shadow-slate-900/30 transition-all duration-300 md:bottom-8 md:right-8 bottom-20 right-4 w-12 h-12 hover:scale-105 active:scale-95 ${
           showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'
         }`}
         aria-label="Scroll to top"
       >
-        <ArrowUp className="w-5 h-5" />
+        <svg className="absolute inset-0 w-full h-full -rotate-90 transform" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255, 255, 255, 0.15)" strokeWidth="3" />
+          <circle
+            cx="24" cy="24" r="22" fill="none"
+            stroke="#3b82f6" strokeWidth="3"
+            strokeDasharray={138.23}
+            strokeDashoffset={138.23 - (scrollProgress / 100) * 138.23}
+            className="transition-all duration-150 ease-out"
+            strokeLinecap="round"
+          />
+        </svg>
+        <ChevronUp className="w-5 h-5 relative z-10" strokeWidth={3} />
       </button>
 
     </div>
