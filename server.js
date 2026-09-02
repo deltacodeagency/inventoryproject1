@@ -173,6 +173,71 @@ app.delete('/api/data/:collection/:id', async (req, res) => {
   }
 });
 
+app.post('/api/returns/process', async (req, res) => {
+  try {
+    const { saleId, returnRecord, remainingSale } = req.body || {};
+    if (!saleId || !returnRecord?.returnNo || !Array.isArray(returnRecord.items)) {
+      return res.status(400).json({ ok: false, error: 'Invalid return request' });
+    }
+
+    await prisma.$transaction(async (transaction) => {
+      await transaction.return.create({
+        data: {
+          id: returnRecord.id,
+          returnNo: returnRecord.returnNo,
+          saleId,
+          invoiceNo: returnRecord.invoiceNo,
+          date: new Date(returnRecord.date),
+          refundTotal: Number(returnRecord.refundTotal || 0),
+          reason: returnRecord.reason || '',
+          items: {
+            create: returnRecord.items.map((item) => ({
+              id: item.id || `${returnRecord.id}-${item.productId}`,
+              productId: item.productId,
+              productName: item.productName,
+              quantity: Number(item.quantity || 0),
+              refundAmount: Number(item.refundAmount || 0),
+            })),
+          },
+        },
+      });
+
+      if (!remainingSale || !Array.isArray(remainingSale.items) || remainingSale.items.length === 0) {
+        await transaction.sale.delete({ where: { id: saleId } });
+        return;
+      }
+
+      await transaction.sale.update({
+        where: { id: saleId },
+        data: {
+          subtotal: Number(remainingSale.subtotal || 0),
+          discount: Number(remainingSale.discount || 0),
+          tax: Number(remainingSale.tax || 0),
+          total: Number(remainingSale.total || 0),
+          paidAmount: Number(remainingSale.paidAmount || 0),
+          updatedAt: new Date(),
+          items: {
+            deleteMany: {},
+            create: remainingSale.items.map((item) => ({
+              id: item.id || `${saleId}-${item.productId}`,
+              productId: item.productId,
+              productName: item.productName,
+              quantity: Number(item.quantity || 0),
+              price: Number(item.price || 0),
+              cost: item.cost == null ? null : Number(item.cost),
+            })),
+          },
+        },
+      });
+    });
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error('Return processing error:', error);
+    return res.status(500).json({ ok: false, error: error?.message || 'Return processing failed' });
+  }
+});
+
 app.post('/api/local-auth/login', async (req, res) => {
   try {
     const identity = String(req.body?.identity || '').trim().toLowerCase();

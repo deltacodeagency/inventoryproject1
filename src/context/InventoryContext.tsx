@@ -79,7 +79,7 @@ interface InventoryContextType {
   deleteSupplier: (id: string) => void;
 
   addPurchase: (pur: Omit<Purchase, 'id' | 'purchaseNo' | 'date'>) => void;
-  addReturn: (ret: Omit<Return, 'id' | 'returnNo' | 'date'>) => void;
+  addReturn: (ret: Omit<Return, 'id' | 'returnNo' | 'date'>) => Promise<void>;
 
   addExpense: (exp: Omit<Expense, 'id' | 'date'>) => void;
   addIncome: (inc: Omit<Income, 'id' | 'date'>) => void;
@@ -973,7 +973,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   // Sales Returns
-  const addReturn = (ret: Omit<Return, 'id' | 'returnNo' | 'date'>) => {
+  const addReturn = async (ret: Omit<Return, 'id' | 'returnNo' | 'date'>) => {
     if (!assertNotSalesman('process sales returns')) return;
     const returnNo = `RET-2026-${String(returns.length + 1).padStart(3, '0')}`;
     const newReturn: Return = {
@@ -982,6 +982,40 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       returnNo,
       date: new Date().toISOString(),
     };
+
+    const returnedQuantities = new Map(ret.items.map((item) => [item.productId, item.quantity]));
+    const saleToUpdate = sales.find((sale) => sale.id === ret.saleId);
+    const remainingItems = saleToUpdate?.items
+      .map((item) => ({
+        ...item,
+        quantity: Math.max(0, item.quantity - (returnedQuantities.get(item.productId) || 0)),
+      }))
+      .filter((item) => item.quantity > 0) || [];
+    const remainingMerchandiseTotal = remainingItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const originalMerchandiseTotal = saleToUpdate?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+    const remainingRatio = originalMerchandiseTotal > 0 ? remainingMerchandiseTotal / originalMerchandiseTotal : 0;
+    const remainingSale = saleToUpdate && remainingItems.length > 0 ? {
+      ...saleToUpdate,
+      items: remainingItems,
+      subtotal: saleToUpdate.subtotal * remainingRatio,
+      discount: saleToUpdate.discount * remainingRatio,
+      tax: (saleToUpdate.tax || 0) * remainingRatio,
+      total: saleToUpdate.total * remainingRatio,
+      paidAmount: Math.min(saleToUpdate.total * remainingRatio, saleToUpdate.paidAmount * remainingRatio),
+    } : null;
+
+    try {
+      const response = await fetch('/api/returns/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ saleId: ret.saleId, returnRecord: newReturn, remainingSale }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.ok !== true) throw new Error(result.error || 'Return processing failed');
+    } catch (error) {
+      addAlert('system', 'Return Failed', error instanceof Error ? error.message : 'Return processing failed.');
+      return;
+    }
 
     // Put items back in inventory in real-time
     setProducts((prev) =>
@@ -1000,7 +1034,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       prev.flatMap((sale) => {
         if (sale.id !== ret.saleId) return [sale];
 
-        const returnedQuantities = new Map(ret.items.map((item) => [item.productId, item.quantity]));
+
         const remainingItems = sale.items
           .map((item) => ({
             ...item,
