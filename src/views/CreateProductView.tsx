@@ -422,14 +422,14 @@ export const CreateProductView: React.FC = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles: File[] = Array.from(e.target.files || []);
     if (selectedFiles.length === 0) return;
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const selectedFile = selectedFiles[0];
+    if (!selectedFile) return;
 
     // This form supports one product photo. Keep the input ready for the
     // next selection even when the same file is chosen again.
     e.target.value = '';
 
-    const oversizedFile = Array.from(files as FileList).find((f: File) => f.size > 8 * 1024 * 1024);
+    const oversizedFile = selectedFiles.find((f: File) => f.size > 8 * 1024 * 1024);
     if (oversizedFile) {
       Swal.fire({ icon: 'error', title: 'File Too Large', text: `Image "${oversizedFile.name}" is too large. Please select images under 8MB.`, confirmButtonColor: '#2563eb' });
       return;
@@ -437,7 +437,7 @@ export const CreateProductView: React.FC = () => {
 
     setIsUploadingImages(true);
     try {
-      const imageUrl = await uploadImageToImgBB(files[0]);
+      const imageUrl = await uploadImageToImgBB(selectedFile);
       setImages([imageUrl]);
     } catch (uploadError) {
       console.error('Image upload failed:', uploadError);

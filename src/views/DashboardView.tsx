@@ -462,7 +462,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(totalPurchasesVal).toLocaleString()}</h3>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap">৳{Math.round(totalPurchasesVal).toLocaleString()}</h3>
             <span className="text-[10px] sm:text-[11px] text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded-full w-fit">
               <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{totalStockEntries} stock additions</span>

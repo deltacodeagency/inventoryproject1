@@ -158,22 +158,29 @@ if (typeof window !== 'undefined' && window.localStorage.getItem('ims_storage_ve
   window.localStorage.setItem('ims_storage_version', NEON_STORAGE_VERSION);
 }
 
+const syncQueues = new Map<string, Promise<void>>();
+
 const syncCollectionToServer = async (key: string, value: unknown) => {
   if (typeof window === 'undefined') return;
 
-  try {
-    const response = await fetch('/api/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ collection: key, records: value }),
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok || result.ok === false) {
-      throw new Error(result.error || `Sync failed for ${key}`);
+  const previousSync = syncQueues.get(key) || Promise.resolve();
+  const currentSync = previousSync.then(async () => {
+    try {
+      const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collection: key, records: value }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.ok === false) {
+        throw new Error(result.error || `Sync failed for ${key}`);
+      }
+    } catch (error) {
+      console.error(`Neon sync failed for ${key}:`, error);
     }
-  } catch (error) {
-    console.error(`Neon sync failed for ${key}:`, error);
-  }
+  });
+  syncQueues.set(key, currentSync);
+  await currentSync;
 };
 
 const fetchCollectionFromNeon = async <T,>(key: string): Promise<T[] | null> => {
