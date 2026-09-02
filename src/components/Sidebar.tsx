@@ -221,7 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
       </div>
 
       {/* Footer Profile Shortcut */}
-      <div className="p-4 bg-[#141E30] border-t border-slate-700/50 flex items-center space-x-3">
+      <div className="p-4 bg-[#141E30] border-t border-slate-700/50 flex space-x-3 items-center">
         <div className="w-8 h-8 rounded-full bg-slate-500 border border-slate-400 flex items-center justify-center font-bold text-xs text-white uppercase">
           {currentUser?.username ? currentUser.username.slice(0, 2) : 'US'}
         </div>
