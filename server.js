@@ -434,6 +434,15 @@ async function persistCollection(collection, records = []) {
     }
 
     if (collection === 'sales') {
+      const incomingInvoiceNos = records
+        .map((record) => String(record?.invoiceNo || '').trim())
+        .filter(Boolean);
+      await prisma.sale.deleteMany({
+        where: incomingInvoiceNos.length
+          ? { invoiceNo: { notIn: incomingInvoiceNos } }
+          : {},
+      });
+
       await prisma.sale.upsert({
         where: { invoiceNo: cleaned.invoiceNo },
         update: {
@@ -560,11 +569,11 @@ async function persistCollection(collection, records = []) {
       await prisma.return.upsert({
         where: { returnNo: cleaned.returnNo },
         update: {
-          saleId: cleaned.saleId, invoiceNo: cleaned.invoiceNo, date: new Date(cleaned.date),
+          saleId: cleaned.saleId || null, invoiceNo: cleaned.invoiceNo, date: new Date(cleaned.date),
           refundTotal: Number(cleaned.refundTotal || 0), reason: cleaned.reason || '', updatedAt: new Date(),
         },
         create: {
-          id: cleaned.id, returnNo: cleaned.returnNo, saleId: cleaned.saleId, invoiceNo: cleaned.invoiceNo,
+          id: cleaned.id, returnNo: cleaned.returnNo, saleId: cleaned.saleId || null, invoiceNo: cleaned.invoiceNo,
           date: new Date(cleaned.date), refundTotal: Number(cleaned.refundTotal || 0), reason: cleaned.reason || '',
           createdAt: cleaned.createdAt ? new Date(cleaned.createdAt) : new Date(), updatedAt: new Date(),
         }

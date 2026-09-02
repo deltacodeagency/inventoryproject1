@@ -448,7 +448,7 @@ export const SalesView: React.FC = () => {
 // 4. RETURN TERMINAL COMPONENT
 // ==========================================
 export const ReturnView: React.FC = () => {
-  const { sales, addReturn, addAlert } = useInventory();
+  const { sales, returns, addReturn, addAlert } = useInventory();
   
   // Selected Invoice
   const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
@@ -470,6 +470,11 @@ export const ReturnView: React.FC = () => {
         quantity: Number(returnItems[item.productId]),
         refundAmount: item.price * Number(returnItems[item.productId]),
       }));
+
+    if (itemsToReturn.some((item) => item.quantity > (activeSale.items.find((saleItem) => saleItem.productId === item.productId)?.quantity || 0))) {
+      addAlert('system', 'Return Failed', 'Return quantity cannot exceed the remaining quantity on the invoice.');
+      return;
+    }
 
     if (itemsToReturn.length === 0) {
       addAlert('system', 'Return Failed', 'Please specify a valid return quantity for at least one item.');
@@ -605,6 +610,43 @@ export const ReturnView: React.FC = () => {
             <p>1. Ensure physical items are reviewed for quality before processing refunds.</p>
             <p>2. Refund amounts are computed strictly on selling prices registered in original invoice.</p>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100">
+          <h4 className="font-bold text-sm text-slate-800">Returned Products</h4>
+          <span className="text-[10px] text-slate-400">Previously processed customer returns</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                <th className="p-4">Return No</th>
+                <th className="p-4">Invoice</th>
+                <th className="p-4">Products</th>
+                <th className="p-4 text-right">Qty</th>
+                <th className="p-4 text-right">Refund</th>
+                <th className="p-4">Reason</th>
+                <th className="p-4">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {returns.length === 0 ? (
+                <tr><td colSpan={7} className="p-10 text-center text-slate-400">No returned products recorded.</td></tr>
+              ) : returns.map((ret) => (
+                <tr key={ret.id} className="hover:bg-slate-50/30 transition-colors">
+                  <td className="p-4 font-mono font-bold text-slate-700">{ret.returnNo}</td>
+                  <td className="p-4 font-mono font-semibold text-slate-600">{ret.invoiceNo}</td>
+                  <td className="p-4 font-semibold text-slate-800">{ret.items.map((item) => `${item.productName} (x${item.quantity})`).join(', ')}</td>
+                  <td className="p-4 text-right font-bold text-slate-700">{ret.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                  <td className="p-4 text-right font-black text-rose-600">৳{Math.round(ret.refundTotal)}</td>
+                  <td className="p-4 max-w-xs">{ret.reason}</td>
+                  <td className="p-4 whitespace-nowrap text-slate-400">{new Date(ret.date).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

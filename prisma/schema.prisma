@@ -222,14 +222,14 @@ model PurchaseItem {
 model Return {
   id          String       @id @default(cuid())
   returnNo    String       @unique
-  saleId      String
+  saleId      String?
   invoiceNo   String
   date        DateTime     @default(now())
   refundTotal Float
   reason      String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  sale        Sale         @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  sale        Sale?        @relation(fields: [saleId], references: [id], onDelete: SetNull)
   items       ReturnItem[]
 
   @@map("return")
