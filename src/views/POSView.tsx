@@ -454,7 +454,7 @@ export const POSView: React.FC = () => {
                   <AppSelect
                     value={discountMode}
                     onChange={(e) => handleDiscountModeChange(e.target.value as 'percentage' | 'amount')}
-                    className="pos-discount-select w-[112px] text-[10px] font-bold"
+                    className="pos-discount-select w-[132px] text-[10px] font-bold"
                     aria-label="Discount type"
                   >
                     <option value="percentage">Percent (%)</option>

@@ -382,6 +382,15 @@ select.select-compact {
   bottom: calc(100% + 0.375rem);
 }
 
+.pos-discount-select {
+  flex: 0 0 132px;
+  width: 132px !important;
+}
+
+.pos-discount-select .app-select-option {
+  white-space: nowrap;
+}
+
 .manage-stock-page button:not(:disabled),
 .stock-adjustment-page button:not(:disabled) {
   cursor: pointer;
