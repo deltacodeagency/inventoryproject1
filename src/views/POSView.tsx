@@ -314,7 +314,7 @@ export const POSView: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full h-auto lg:overflow-hidden text-xs text-slate-600 select-none pb-12 lg:pb-0 lg:min-h-0 flex-1">
       {/* RIGHT: Register pane / POS Cart (Cols: 5) - Order 1 on Mobile so Register Checkout is at Top */}
-      <div className="order-1 lg:order-2 lg:col-span-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col lg:h-full h-auto min-h-[420px] lg:min-h-0 overflow-hidden relative">
+      <div className="order-1 lg:order-2 lg:col-span-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col lg:h-full h-auto min-h-[420px] lg:min-h-0 overflow-visible relative">
         {/* Cart Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60 shrink-0">
           <div className="flex items-center space-x-2">
@@ -454,7 +454,7 @@ export const POSView: React.FC = () => {
                   <AppSelect
                     value={discountMode}
                     onChange={(e) => handleDiscountModeChange(e.target.value as 'percentage' | 'amount')}
-                    className="w-[112px] text-[10px] font-bold"
+                    className="pos-discount-select w-[112px] text-[10px] font-bold"
                     aria-label="Discount type"
                   >
                     <option value="percentage">Percent (%)</option>

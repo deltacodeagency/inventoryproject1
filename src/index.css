@@ -377,6 +377,11 @@ select.select-compact {
   overflow-y: visible;
 }
 
+.pos-discount-select .app-select-menu {
+  top: auto;
+  bottom: calc(100% + 0.375rem);
+}
+
 .manage-stock-page button:not(:disabled),
 .stock-adjustment-page button:not(:disabled) {
   cursor: pointer;
