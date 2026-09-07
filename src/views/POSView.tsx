@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { AppSelect } from '../components/AppSelect';
 import {
@@ -53,10 +53,40 @@ export const POSView: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Mobile'>('Cash');
   const [mobileOption, setMobileOption] = useState<'bKash' | 'Nagad' | 'Rocket'>('bKash');
   const [invoiceReceipt, setInvoiceReceipt] = useState<Sale | null>(null);
+  const [quantityDrafts, setQuantityDrafts] = useState<Record<string, string>>({});
+  const [discountMode, setDiscountMode] = useState<'percentage' | 'amount'>('amount');
+  const [discountInput, setDiscountInput] = useState('');
 
   // Cart math
   const cartSubtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+  const discountValue = Math.max(0, Number(discountInput) || 0);
+  const calculatedDiscount = discountMode === 'percentage'
+    ? Math.min(cartSubtotal, cartSubtotal * Math.min(discountValue, 100) / 100)
+    : Math.min(cartSubtotal, discountValue);
   const cartTotal = Math.max(0, Math.round((cartSubtotal - cartDiscount) * 100) / 100);
+
+  useEffect(() => {
+    setCartDiscount(Math.round(calculatedDiscount * 100) / 100);
+  }, [calculatedDiscount, setCartDiscount]);
+
+  const commitQuantity = (productId: string, value: string) => {
+    const item = cart.find((cartItem) => cartItem.product.id === productId);
+    if (!item) return;
+
+    const parsedQuantity = Number(value);
+    const nextQuantity = Number.isInteger(parsedQuantity) && parsedQuantity > 0
+      ? Math.min(parsedQuantity, item.product.stock)
+      : item.quantity;
+
+    setQuantityDrafts((prev) => ({ ...prev, [productId]: String(nextQuantity) }));
+    updateCartQuantity(productId, nextQuantity);
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+    setQuantityDrafts({});
+    setDiscountInput('');
+  };
 
   // Filtered product catalog
   const catalogList = products.filter((p) => {
@@ -219,6 +249,8 @@ export const POSView: React.FC = () => {
     if (receipt) {
       setInvoiceReceipt(receipt);
       setShowPaymentModal(false);
+      setQuantityDrafts({});
+      setDiscountInput('');
       // Reset forms
       setCustomer('Walk-in Customer');
       setCustomCustomerName('');
@@ -239,7 +271,7 @@ export const POSView: React.FC = () => {
           </div>
           {cart.length > 0 && (
             <button
-              onClick={() => clearCart()}
+              onClick={handleClearCart}
               className="text-[10px] text-slate-400 hover:text-rose-500 font-semibold cursor-pointer"
             >
               Clear Cart
@@ -314,7 +346,19 @@ export const POSView: React.FC = () => {
                     >
                       <Minus className="w-3 h-3" />
                     </button>
-                    <span className="px-2 font-bold text-xs text-slate-800 min-w-[20px] text-center">{item.quantity}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={item.product.stock}
+                      value={quantityDrafts[item.product.id] ?? String(item.quantity)}
+                      onChange={(e) => setQuantityDrafts((prev) => ({ ...prev, [item.product.id]: e.target.value }))}
+                      onBlur={(e) => commitQuantity(item.product.id, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') e.currentTarget.blur();
+                      }}
+                      className="w-10 bg-transparent text-center font-bold text-xs text-slate-800 focus:outline-none"
+                      aria-label={`Quantity for ${item.product.name}`}
+                    />
                     <button
                       onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
                       disabled={item.quantity >= item.product.stock}
@@ -348,20 +392,40 @@ export const POSView: React.FC = () => {
               <span className="font-bold text-slate-800 text-[11px]">৳{Math.round(cartSubtotal)}</span>
             </div>
 
-            <div className="flex items-center justify-between space-x-2">
-              <label className="font-bold text-slate-500 text-[11px] flex items-center space-x-1">
-                <Percent className="w-3 h-3 text-slate-400" />
-                <span>Custom Discount (৳):</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={cartDiscount || ''}
-                onChange={(e) => setCartDiscount(Number(e.target.value) || 0)}
-                placeholder="0"
-                className="w-20 px-2 py-1 border border-slate-200 rounded-md text-right font-bold text-xs bg-white focus:outline-none focus:border-blue-500"
-              />
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between space-x-2">
+                <label className="font-bold text-slate-500 text-[11px] flex items-center space-x-1">
+                  {discountMode === 'percentage' ? <Percent className="w-3 h-3 text-slate-400" /> : <TakaIcon className="w-3 h-3 text-slate-400" />}
+                  <span>Custom Discount:</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={discountMode}
+                    onChange={(e) => setDiscountMode(e.target.value as 'percentage' | 'amount')}
+                    className="px-1.5 py-1 border border-slate-200 rounded-md text-[10px] font-bold bg-white focus:outline-none focus:border-blue-500"
+                    aria-label="Discount type"
+                  >
+                    <option value="percentage">Percent (%)</option>
+                    <option value="amount">Taka (৳)</option>
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    max={discountMode === 'percentage' ? 100 : cartSubtotal}
+                    step={discountMode === 'percentage' ? '0.01' : '1'}
+                    value={discountInput}
+                    onChange={(e) => setDiscountInput(e.target.value)}
+                    placeholder="0"
+                    className="w-20 px-2 py-1 border border-slate-200 rounded-md text-right font-bold text-xs bg-white focus:outline-none focus:border-blue-500"
+                    aria-label={discountMode === 'percentage' ? 'Discount percentage' : 'Discount amount in taka'}
+                  />
+                </div>
+              </div>
+              {calculatedDiscount > 0 && (
+                <div className="text-right text-[10px] font-semibold text-rose-500">
+                  Applied discount: ৳{Math.round(calculatedDiscount)}
+                </div>
+              )}
             </div>
           </div>
         )}
