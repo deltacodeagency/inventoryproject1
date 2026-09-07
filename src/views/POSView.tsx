@@ -64,6 +64,7 @@ export const POSView: React.FC = () => {
     ? Math.min(cartSubtotal, cartSubtotal * Math.min(discountValue, 100) / 100)
     : Math.min(cartSubtotal, discountValue);
   const cartTotal = Math.max(0, Math.round((cartSubtotal - cartDiscount) * 100) / 100);
+  const discountInputMax = discountMode === 'percentage' ? 100 : cartSubtotal;
 
   useEffect(() => {
     setCartDiscount(Math.round(calculatedDiscount * 100) / 100);
@@ -78,14 +79,65 @@ export const POSView: React.FC = () => {
       ? Math.min(parsedQuantity, item.product.stock)
       : item.quantity;
 
-    setQuantityDrafts((prev) => ({ ...prev, [productId]: String(nextQuantity) }));
+    setQuantityDrafts((prev) => {
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
     updateCartQuantity(productId, nextQuantity);
+  };
+
+  const changeCartQuantity = (productId: string, quantity: number) => {
+    setQuantityDrafts((prev) => {
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
+    updateCartQuantity(productId, quantity);
+  };
+
+  const handleRemoveFromCart = (productId: string) => {
+    setQuantityDrafts((prev) => {
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
+    removeFromCart(productId);
+  };
+
+  const handleAddToCart = (product: Product) => {
+    setQuantityDrafts((prev) => {
+      const next = { ...prev };
+      delete next[product.id];
+      return next;
+    });
+    addToCart(product);
   };
 
   const handleClearCart = () => {
     clearCart();
     setQuantityDrafts({});
     setDiscountInput('');
+  };
+
+  const handleDiscountModeChange = (nextMode: 'percentage' | 'amount') => {
+    const currentValue = Number(discountInput);
+    setDiscountMode(nextMode);
+    if (discountInput !== '' && (!Number.isFinite(currentValue) || currentValue < 0 || currentValue > (nextMode === 'percentage' ? 100 : cartSubtotal))) {
+      setDiscountInput('');
+    }
+  };
+
+  const handleDiscountInputChange = (value: string) => {
+    if (value === '') {
+      setDiscountInput('');
+      return;
+    }
+
+    const nextValue = Number(value);
+    if (Number.isFinite(nextValue) && nextValue >= 0 && nextValue <= discountInputMax) {
+      setDiscountInput(value);
+    }
   };
 
   // Filtered product catalog
@@ -341,7 +393,7 @@ export const POSView: React.FC = () => {
                 <div className="flex items-center space-x-2 shrink-0">
                   <div className="flex items-center border border-slate-200 rounded-lg bg-slate-50 overflow-hidden">
                     <button
-                      onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
+                      onClick={() => changeCartQuantity(item.product.id, item.quantity - 1)}
                       className="p-1 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
                     >
                       <Minus className="w-3 h-3" />
@@ -360,7 +412,7 @@ export const POSView: React.FC = () => {
                       aria-label={`Quantity for ${item.product.name}`}
                     />
                     <button
-                      onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
+                      onClick={() => changeCartQuantity(item.product.id, item.quantity + 1)}
                       disabled={item.quantity >= item.product.stock}
                       className="p-1 hover:bg-slate-200 text-slate-600 disabled:opacity-30 transition-colors cursor-pointer"
                     >
@@ -373,7 +425,7 @@ export const POSView: React.FC = () => {
                   </span>
 
                   <button
-                    onClick={() => removeFromCart(item.product.id)}
+                    onClick={() => handleRemoveFromCart(item.product.id)}
                     className="text-slate-300 hover:text-rose-500 p-1 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -399,22 +451,22 @@ export const POSView: React.FC = () => {
                   <span>Custom Discount:</span>
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <select
+                  <AppSelect
                     value={discountMode}
-                    onChange={(e) => setDiscountMode(e.target.value as 'percentage' | 'amount')}
-                    className="px-1.5 py-1 border border-slate-200 rounded-md text-[10px] font-bold bg-white focus:outline-none focus:border-blue-500"
+                    onChange={(e) => handleDiscountModeChange(e.target.value as 'percentage' | 'amount')}
+                    className="w-[112px] text-[10px] font-bold"
                     aria-label="Discount type"
                   >
                     <option value="percentage">Percent (%)</option>
                     <option value="amount">Taka (৳)</option>
-                  </select>
+                  </AppSelect>
                   <input
                     type="number"
                     min="0"
                     max={discountMode === 'percentage' ? 100 : cartSubtotal}
                     step={discountMode === 'percentage' ? '0.01' : '1'}
                     value={discountInput}
-                    onChange={(e) => setDiscountInput(e.target.value)}
+                    onChange={(e) => handleDiscountInputChange(e.target.value)}
                     placeholder="0"
                     className="w-20 px-2 py-1 border border-slate-200 rounded-md text-right font-bold text-xs bg-white focus:outline-none focus:border-blue-500"
                     aria-label={discountMode === 'percentage' ? 'Discount percentage' : 'Discount amount in taka'}
@@ -500,7 +552,7 @@ export const POSView: React.FC = () => {
                 return (
                   <div
                     key={prod.id}
-                    onClick={() => !isOut && addToCart(prod)}
+                    onClick={() => !isOut && handleAddToCart(prod)}
                     className={`rounded-2xl p-3 text-left shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative group cursor-pointer ${
                       isOut
                         ? 'bg-white border border-slate-100 opacity-40 cursor-not-allowed border-dashed'
@@ -546,7 +598,7 @@ export const POSView: React.FC = () => {
                           title="Add product quantity"
                           onClick={(e) => {
                             e.stopPropagation();
-                            addToCart(prod);
+                            handleAddToCart(prod);
                           }}
                           disabled={cartQuantity >= prod.stock}
                           className="w-6 h-6 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white flex items-center justify-center transition-colors cursor-pointer font-black active:scale-95"
