@@ -147,6 +147,12 @@ const MainAppContent: React.FC = () => {
     }
   }, [currentPath, currentUser, isAuthLoading]);
 
+  useEffect(() => {
+    if (activeView === 'dashboard') {
+      dashboardAnimationPlayed.current = true;
+    }
+  }, [activeView]);
+
   // Keep the login fallback from flashing while Better Auth restores an OAuth session.
   if (isAuthLoading) {
     return (
@@ -227,12 +233,6 @@ const MainAppContent: React.FC = () => {
         return <DashboardView />;
     }
   };
-
-  useEffect(() => {
-    if (activeView === 'dashboard') {
-      dashboardAnimationPlayed.current = true;
-    }
-  }, [activeView]);
 
   return (
     <>
