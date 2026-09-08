@@ -545,6 +545,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => {
                   setActiveView('profile');
+                  appNavigate('/profile');
                   setShowProfileDropdown(false);
                 }}
                 className={`w-full text-left px-4 py-2.5 text-xs flex items-center space-x-2 transition-colors cursor-pointer ${

@@ -100,6 +100,7 @@ const MainAppContent: React.FC = () => {
       '/invoice': 'invoice',
       '/sales': 'sales',
       '/return': 'return',
+      '/profile': 'profile',
     };
 
     const view = currentPath.startsWith('/rep-') ? currentPath.slice(1) : viewByPath[currentPath];

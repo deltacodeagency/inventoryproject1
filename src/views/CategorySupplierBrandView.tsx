@@ -840,7 +840,7 @@ export const SupplierView: React.FC = () => {
                   <label className="font-bold text-slate-400">Phone</label>
                   <input
                     type="text"
-                    placeholder="+1 (555) 123-45"
+                    placeholder="+880123456789"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 font-medium text-slate-700"

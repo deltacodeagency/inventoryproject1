@@ -149,8 +149,15 @@ export const DashboardView: React.FC = () => {
   }, [filteredSalesForChart, filteredPurchasesForChart]);
 
   const salesPurchaseProfit = useMemo(
-    () => salesPurchasePeriodSum.sales - salesPurchasePeriodSum.purchases,
-    [salesPurchasePeriodSum]
+    () => filteredSalesForChart.reduce((sum, sale) => {
+      const saleCost = sale.costOfGoodsSold ?? (sale.items || []).reduce((itemSum, item) => {
+        const product = products.find(p => p.id === item.productId);
+        const itemCost = item.cost || product?.cost || (item.price * 0.7);
+        return itemSum + (itemCost * item.quantity);
+      }, 0);
+      return sum + (sale.total || 0) - saleCost;
+    }, 0),
+    [filteredSalesForChart, products]
   );
 
   const getRecentPeriods = (range: typeof salesPurchaseRange) => {
@@ -478,7 +485,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Stock Asset Value</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(totalStockVal).toLocaleString()}</h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap">৳{Math.round(totalStockVal).toLocaleString()}</h3>
             <span className="text-[10px] sm:text-[11px] text-indigo-600 font-bold flex items-center bg-indigo-50 px-2 py-0.5 rounded-full w-fit">
               <Boxes className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{products.length} distinct products</span>
@@ -577,7 +584,7 @@ export const DashboardView: React.FC = () => {
               <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                 <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wide">Profit</span>
                 <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchaseProfit.toLocaleString()}</h3>
-                <span className="text-[11px] text-slate-500">Sales minus purchases for selected range.</span>
+                <span className="text-[11px] text-slate-500">Sales minus cost of goods for selected range.</span>
               </div>
             )}
           </div>

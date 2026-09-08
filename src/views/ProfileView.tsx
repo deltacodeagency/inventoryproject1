@@ -34,7 +34,7 @@ export const ProfileView: React.FC = () => {
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [fullName, setFullName] = useState(currentUser?.fullName || currentUser?.username || '');
   const [username, setUsername] = useState(currentUser?.username || '');
-  const [email] = useState(currentUser?.email || ''); // Read-only
+  const [email, setEmail] = useState(currentUser?.email || '');
 
   // Password Settings State
   const [oldPassword, setOldPassword] = useState('');
@@ -132,6 +132,11 @@ export const ProfileView: React.FC = () => {
 
     if (!username.trim()) {
       setError('Username name cannot be empty.');
+      return;
+    }
+
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please enter a valid email address.');
       return;
     }
 
@@ -442,7 +447,7 @@ export const ProfileView: React.FC = () => {
                 <div className="bg-slate-50/50 p-3.5 rounded-lg border border-slate-100/80">
                   <div className="flex justify-between items-start">
                     <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">Email Address</span>
-                    <span className="text-[9px] bg-slate-200 text-slate-500 font-bold px-1.5 py-0.5 rounded">Locked</span>
+                    <span className="text-[9px] bg-blue-50 text-blue-600 font-bold px-1.5 py-0.5 rounded">Editable</span>
                   </div>
                   <span className="text-xs font-semibold text-slate-700 flex items-center space-x-2">
                     <Mail className="w-3.5 h-3.5 text-slate-400" />
@@ -482,19 +487,20 @@ export const ProfileView: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 opacity-70">
+                  <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-xs font-semibold text-slate-500 block">Email Address</label>
-                      <span className="text-[9px] text-slate-400 italic">Cannot be changed</span>
+                      <label className="text-xs font-semibold text-slate-600 block">Email Address</label>
+                      <span className="text-[9px] text-slate-400 italic">Can be changed</span>
                     </div>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                       <input
                         type="email"
                         value={email}
-                        disabled
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Your email address"
-                        className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 bg-slate-50 text-slate-400 rounded-lg focus:outline-none cursor-not-allowed"
+                        className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-slate-700"
+                        required
                       />
                     </div>
                   </div>
@@ -506,6 +512,7 @@ export const ProfileView: React.FC = () => {
                     onClick={() => {
                       setFullName(currentUser.fullName);
                       setUsername(currentUser.username);
+                      setEmail(currentUser.email);
                       setError(null);
                       setIsEditingDetails(false);
                     }}
