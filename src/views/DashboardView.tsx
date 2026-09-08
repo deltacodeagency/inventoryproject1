@@ -23,14 +23,19 @@ const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({
   const hasAnimated = React.useRef(false);
 
   useEffect(() => {
-    if (!animateValue || hasAnimated.current) {
+    if (!animateValue) {
+      setDisplayValue(value);
+      return;
+    }
+
+    if (hasAnimated.current || value === 0) {
       setDisplayValue(value);
       return;
     }
 
     hasAnimated.current = true;
     const animation = animate(0, value, {
-      duration: 0.9,
+      duration: 1.5,
       ease: 'easeOut',
       onUpdate: (latest) => setDisplayValue(latest)
     });
