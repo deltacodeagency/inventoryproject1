@@ -33,11 +33,13 @@ const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({
       return;
     }
 
-    hasAnimated.current = true;
     const animation = animate(0, value, {
       duration: 1.5,
       ease: 'easeOut',
-      onUpdate: (latest) => setDisplayValue(latest)
+      onUpdate: (latest) => setDisplayValue(latest),
+      onComplete: () => {
+        hasAnimated.current = true;
+      }
     });
 
     return () => animation.stop();
