@@ -447,7 +447,6 @@ export const ProfileView: React.FC = () => {
                 <div className="bg-slate-50/50 p-3.5 rounded-lg border border-slate-100/80">
                   <div className="flex justify-between items-start">
                     <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">Email Address</span>
-                    <span className="text-[9px] bg-blue-50 text-blue-600 font-bold px-1.5 py-0.5 rounded">Editable</span>
                   </div>
                   <span className="text-xs font-semibold text-slate-700 flex items-center space-x-2">
                     <Mail className="w-3.5 h-3.5 text-slate-400" />
@@ -490,7 +489,6 @@ export const ProfileView: React.FC = () => {
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-semibold text-slate-600 block">Email Address</label>
-                      <span className="text-[9px] text-slate-400 italic">Can be changed</span>
                     </div>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />

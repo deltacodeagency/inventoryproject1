@@ -69,10 +69,17 @@ export const ReportsView: React.FC = () => {
       const prod = products.find(p => p.id === a.productId);
       return sum + (a.quantity * (a.cost || (prod?.cost ?? 0)));
   }, 0);
-  const totalPurchasesSum = filteredPurchases.reduce((sum, purchase) => {
+  const storedPurchasesTotal = filteredPurchases.reduce((sum, purchase) => {
     const lineItemTotal = purchase.items.reduce((itemSum, item) => itemSum + (item.quantity * item.cost), 0);
     return sum + (purchase.total || lineItemTotal);
   }, 0) + adjustmentPurchaseTotal;
+  const batchPurchasesTotal = products.reduce((sum, product) => {
+    const batches = ensureProductBatches(product);
+    return sum + batches
+      .filter(batch => isWithinDate(batch.date || product.createdAt || ''))
+      .reduce((batchSum, batch) => batchSum + ((batch.initialQuantity || batch.quantity || 0) * (batch.cost || 0)), 0);
+  }, 0);
+  const totalPurchasesSum = purchases.length > 0 ? storedPurchasesTotal : batchPurchasesTotal;
 
   const totalExpensesSum = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   

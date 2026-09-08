@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { animate } from 'motion/react';
 import { useInventory, ensureProductBatches } from '../context/InventoryContext';
 import {
   TrendingUp,
@@ -16,6 +17,22 @@ import {
 } from 'lucide-react';
 import { TakaIcon } from '../components/TakaIcon';
 import { AppSelect } from '../components/AppSelect';
+
+const AnimatedTakaValue: React.FC<{ value: number }> = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const animation = animate(0, value, {
+      duration: 0.9,
+      ease: 'easeOut',
+      onUpdate: (latest) => setDisplayValue(latest)
+    });
+
+    return () => animation.stop();
+  }, [value]);
+
+  return <>৳{Math.round(displayValue).toLocaleString()}</>;
+};
 
 export const DashboardView: React.FC = () => {
   const {
@@ -453,7 +470,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Sales</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(totalSalesVal).toLocaleString()}</h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={totalSalesVal} /></h3>
             <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
               <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{sales.length} transactions</span>
@@ -469,7 +486,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
-            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap">৳{Math.round(totalPurchasesVal).toLocaleString()}</h3>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalPurchasesVal} /></h3>
             <span className="text-[10px] sm:text-[11px] text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded-full w-fit">
               <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{totalStockEntries} stock additions</span>
@@ -485,7 +502,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Stock Asset Value</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap">৳{Math.round(totalStockVal).toLocaleString()}</h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalStockVal} /></h3>
             <span className="text-[10px] sm:text-[11px] text-indigo-600 font-bold flex items-center bg-indigo-50 px-2 py-0.5 rounded-full w-fit">
               <Boxes className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{products.length} distinct products</span>
@@ -502,7 +519,7 @@ export const DashboardView: React.FC = () => {
           <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
               <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Profit</span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate">৳{Math.round(profitVal).toLocaleString()}</h3>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={profitVal} /></h3>
               <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
                 <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
                 <span className="truncate">Net Income Calc</span>
