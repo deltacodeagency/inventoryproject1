@@ -18,10 +18,17 @@ import {
 import { TakaIcon } from '../components/TakaIcon';
 import { AppSelect } from '../components/AppSelect';
 
-const AnimatedTakaValue: React.FC<{ value: number }> = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState(0);
+const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({ value, animateValue }) => {
+  const [displayValue, setDisplayValue] = useState(animateValue ? 0 : value);
+  const hasAnimated = React.useRef(false);
 
   useEffect(() => {
+    if (!animateValue || hasAnimated.current) {
+      setDisplayValue(value);
+      return;
+    }
+
+    hasAnimated.current = true;
     const animation = animate(0, value, {
       duration: 0.9,
       ease: 'easeOut',
@@ -29,12 +36,12 @@ const AnimatedTakaValue: React.FC<{ value: number }> = ({ value }) => {
     });
 
     return () => animation.stop();
-  }, [value]);
+  }, [value, animateValue]);
 
   return <>৳{Math.round(displayValue).toLocaleString()}</>;
 };
 
-export const DashboardView: React.FC = () => {
+export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateValues = true }) => {
   const {
     products,
     categories,
@@ -470,7 +477,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Sales</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={totalSalesVal} /></h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={totalSalesVal} animateValue={animateValues} /></h3>
             <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
               <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{sales.length} transactions</span>
@@ -486,7 +493,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
-            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalPurchasesVal} /></h3>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalPurchasesVal} animateValue={animateValues} /></h3>
             <span className="text-[10px] sm:text-[11px] text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded-full w-fit">
               <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{totalStockEntries} stock additions</span>
@@ -502,7 +509,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Stock Asset Value</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalStockVal} /></h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalStockVal} animateValue={animateValues} /></h3>
             <span className="text-[10px] sm:text-[11px] text-indigo-600 font-bold flex items-center bg-indigo-50 px-2 py-0.5 rounded-full w-fit">
               <Boxes className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{products.length} distinct products</span>
@@ -519,7 +526,7 @@ export const DashboardView: React.FC = () => {
           <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
               <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Profit</span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={profitVal} /></h3>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-800 truncate"><AnimatedTakaValue value={profitVal} animateValue={animateValues} /></h3>
               <span className="text-[10px] sm:text-[11px] text-emerald-600 font-bold flex items-center bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
                 <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
                 <span className="truncate">Net Income Calc</span>
@@ -675,7 +682,15 @@ export const DashboardView: React.FC = () => {
 
                       return (
                         <div key={idx} className="flex flex-col items-center space-y-1 group relative">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 bg-slate-900 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                          <div
+                            className={`opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 bg-slate-900 text-white text-[10px] py-1 px-2 rounded font-bold whitespace-nowrap z-20 pointer-events-none shadow-lg ${
+                              idx === 0
+                                ? 'left-0'
+                                : idx === salesPurchaseBars.length - 1
+                                  ? 'right-0'
+                                  : 'left-1/2 -translate-x-1/2'
+                            }`}
+                          >
                             Sales: ৳{bar.sales} | Purchase: ৳{bar.purchase}
                           </div>
                           <div className="w-4 sm:w-8 bg-blue-200 rounded-t-lg overflow-hidden flex flex-col justify-end transition-all group-hover:brightness-105" style={{ height: `${purchHeight}px` }}>

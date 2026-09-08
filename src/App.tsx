@@ -34,6 +34,7 @@ const MainAppContent: React.FC = () => {
   const { activeView, setActiveView, currentUser, isAuthLoading, logoutUser, setEditingProduct, setViewingProduct } = useInventory();
   
   const mainRef = useRef<HTMLElement>(null);
+  const dashboardAnimationPlayed = useRef(false);
 
   // Real URL path state (`/`, `/login`, `/dashboard`, etc.)
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -182,7 +183,7 @@ const MainAppContent: React.FC = () => {
 
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView animateValues={!dashboardAnimationPlayed.current} />;
       case 'super-admin':
         return <SuperAdminView />;
       case 'products':
@@ -226,6 +227,12 @@ const MainAppContent: React.FC = () => {
         return <DashboardView />;
     }
   };
+
+  useEffect(() => {
+    if (activeView === 'dashboard') {
+      dashboardAnimationPlayed.current = true;
+    }
+  }, [activeView]);
 
   return (
     <>
