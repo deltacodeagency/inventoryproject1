@@ -128,14 +128,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
       {/* Mobile Drawer Backdrop */}
       {isMobileSidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 z-40 md:hidden animate-in fade-in duration-200"
+          className="fixed inset-x-0 top-16 bottom-0 bg-slate-900/60 z-40 md:hidden animate-in fade-in duration-200"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-[#1B283F] border-r border-slate-700/50 text-slate-300 h-full overflow-y-auto flex flex-col z-50 md:z-20 select-none transition-transform duration-300 md:transition-none md:translate-x-0 md:sticky md:top-0 md:h-screen md:flex flex-shrink-0 ${
+        className={`fixed left-0 top-16 bottom-0 w-64 bg-[#1B283F] border-r border-slate-700/50 text-slate-300 h-[calc(100dvh-4rem)] overflow-y-auto flex flex-col z-50 md:inset-y-0 md:h-screen md:z-20 select-none transition-transform duration-300 md:transition-none md:translate-x-0 md:sticky md:top-0 md:flex flex-shrink-0 ${
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
