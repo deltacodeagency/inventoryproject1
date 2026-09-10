@@ -540,7 +540,7 @@ export const Header: React.FC = () => {
               <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex flex-col items-center text-center bg-slate-50/50 dark:bg-slate-800/10">
                 {renderAvatar("w-9 h-9 text-xs mb-1.5")}
                 <p className="text-xs font-bold text-slate-800 dark:text-slate-200 capitalize mt-1">{currentUser?.fullName || 'User'}</p>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate w-full">{currentUser?.email || 'user@dreamspos.com'}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate w-full">{currentUser?.email || 'user@ismailtrading.local'}</p>
               </div>
               <button
                 onClick={() => {

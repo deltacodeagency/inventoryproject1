@@ -145,8 +145,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           DP
         </div>
         <div>
-          <h1 className="font-bold text-white tracking-tight text-lg">DreamsPOS</h1>
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block -mt-1">Retail System</span>
+          <h1 className="font-bold text-white tracking-tight text-lg">ISMAIL TRADING</h1>
+          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block -mt-1">Accessories &amp; Dealership</span>
         </div>
       </div>
 

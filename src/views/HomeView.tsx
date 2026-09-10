@@ -38,15 +38,15 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
       <div className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-indigo-600/15 blur-[140px]" />
 
       <header className="relative z-20 flex items-center justify-between gap-2 border-b border-slate-800/80 bg-slate-950/80 px-3 py-3 backdrop-blur-md sm:gap-3 sm:px-6 sm:py-4">
-        <button className="flex min-w-0 items-center gap-2.5 text-left sm:gap-3" onClick={() => onNavigate('/')} aria-label="Go to DreamsPOS home">
+        <button className="flex min-w-0 items-center gap-2.5 text-left sm:gap-3" onClick={() => onNavigate('/')} aria-label="Go to ISMAIL TRADING home">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 sm:h-10 sm:w-10">
             <Store className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 text-base font-black tracking-tight text-white sm:gap-2 sm:text-lg">
-              Dreams<span className="text-blue-500">POS</span>
+              ISMAIL TRADING
             </span>
-            <span className="block truncate text-[10px] font-medium text-slate-400 sm:text-[11px]">Local Shop Inventory Engine</span>
+            <span className="block truncate text-[10px] font-medium text-slate-400 sm:text-[11px]">Accessories &amp; Dealership</span>
           </span>
         </button>
 
@@ -145,7 +145,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
       </main>
 
       <footer className="relative z-20 mt-auto border-t border-slate-800/80 bg-slate-950 px-4 py-3 text-center text-[10px] font-medium text-slate-500 shrink-0">
-        <span>© 2026 DreamsPOS. All rights reserved.</span>
+        <span>© 2026 ISMAIL TRADING. All rights reserved.</span>
       </footer>
     </div>
   );

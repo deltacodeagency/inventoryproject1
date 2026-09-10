@@ -188,7 +188,10 @@ export const InvoiceView: React.FC = () => {
             {/* Receipt layout */}
             <div className="border border-slate-100 bg-slate-50/50 rounded-xl p-4 space-y-3 font-mono text-[10px] text-slate-500">
               <div className="text-center border-b border-dashed border-slate-200 pb-2">
-                <p className="font-bold text-slate-700">DREAMSPOS RETAIL LTD</p>
+                <p className="font-bold text-slate-700">ISMAIL TRADING</p>
+                <p>Accessories &amp; Dealership</p>
+                <p>Sadek Chairman Plaza (3rd Floor), Bypass, Laksham, Cumilla</p>
+                <p>Hotline: 01648304006</p>
                 <p>{new Date(activeInvoice.date).toLocaleString()}</p>
                 <div className="inline-block bg-slate-100 px-2 py-0.5 rounded font-mono font-bold text-slate-800 text-[10px] my-1 border border-slate-200">
                   MONEY RECEIPT SERIAL: {activeInvoice.receiptSerial || activeInvoice.invoiceNo}
@@ -251,8 +254,10 @@ export const InvoiceView: React.FC = () => {
                 const printableHTML = `
                   <div style="font-family: 'Courier New', Courier, monospace, sans-serif; max-width: 320px; margin: 0 auto; color: #0f172a; font-size: 12px; line-height: 1.4; padding: 12px; background: #fff;">
                     <div style="text-align: center; margin-bottom: 12px;">
-                      <h2 style="margin: 0 0 4px 0; font-size: 16px; font-weight: bold;">DREAMSPOS RETAIL LTD</h2>
-                      <div style="font-size: 11px; color: #475569;">Dhaka, Bangladesh | Hot Line: +880 1700-000000</div>
+                      <h2 style="margin: 0 0 4px 0; font-size: 16px; font-weight: bold;">ISMAIL TRADING</h2>
+                      <div style="font-size: 11px; color: #475569;">Accessories &amp; Dealership</div>
+                      <div style="font-size: 11px; color: #475569;">Sadek Chairman Plaza (3rd Floor), Bypass, Laksham, Cumilla</div>
+                      <div style="font-size: 11px; color: #475569;">Hotline: 01648304006</div>
                       <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 8px; font-weight: bold; display: inline-block; margin: 6px 0; border-radius: 4px; font-size: 11px;">
                         MONEY RECEIPT SERIAL NO: ${serialNo}
                       </div>

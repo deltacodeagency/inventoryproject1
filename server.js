@@ -279,8 +279,8 @@ app.post('/api/password-reset/request', async (req, res) => {
       });
       await sendEmail({
         to: email,
-        subject: 'DreamsPOS password reset code',
-        text: `Your DreamsPOS password reset code is ${otp}. It expires in 10 minutes.`,
+        subject: 'ISMAIL TRADING password reset code',
+        text: `Your ISMAIL TRADING password reset code is ${otp}. It expires in 10 minutes.`,
       });
     }
 
@@ -395,7 +395,7 @@ async function persistCollection(collection, records = []) {
       const userId = cleaned.id || cleaned.email || `user-${Date.now()}`;
       const username = normalizeAuditIdentity(cleaned.username || cleaned.name || 'administrator');
       const fullName = String(cleaned.fullName || cleaned.name || username).trim();
-      const email = cleaned.email || `${username}@dreamspos.local`;
+      const email = cleaned.email || `${username}@ismailtrading.local`;
       const passwordHash = cleaned.password
         ? (String(cleaned.password).startsWith('$2') ? cleaned.password : await bcrypt.hash(String(cleaned.password), 12))
         : undefined;

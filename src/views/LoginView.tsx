@@ -107,7 +107,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onNavigate }) => {
               <Store className="w-6 h-6" />
             </div>
             <span className="text-2xl font-black text-white tracking-tight">
-              Dreams<span className="text-blue-500">POS</span>
+              ISMAIL TRADING
             </span>
           </div>
           <h2 className="text-lg font-bold text-white tracking-tight pt-1">Sign In to Your Workspace</h2>

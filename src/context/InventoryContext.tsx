@@ -122,9 +122,9 @@ const normalizeAuditIdentity = (value?: string): string => {
 };
 
 const getDefaultUsers = (): User[] => [
-  { id: 'u-1', fullName: 'Administrator', username: 'administrator', email: 'admin@dreamspos.com', role: 'Administrator', createdAt: new Date('2026-01-01').toISOString(), password: 'administrator' },
-  { id: 'u-2', fullName: 'Emma Manager', username: 'emma', email: 'emma@dreamspos.com', role: 'Manager', createdAt: new Date('2026-02-15').toISOString(), password: 'administrator' },
-  { id: 'u-3', fullName: 'David Salesman', username: 'david', email: 'david@dreamspos.com', role: 'Salesman', createdAt: new Date('2026-03-22').toISOString(), password: 'administrator' },
+  { id: 'u-1', fullName: 'Administrator', username: 'administrator', email: 'admin@ismailtrading.local', role: 'Administrator', createdAt: new Date('2026-01-01').toISOString(), password: 'administrator' },
+  { id: 'u-2', fullName: 'Emma Manager', username: 'emma', email: 'emma@ismailtrading.local', role: 'Manager', createdAt: new Date('2026-02-15').toISOString(), password: 'administrator' },
+  { id: 'u-3', fullName: 'David Salesman', username: 'david', email: 'david@ismailtrading.local', role: 'Salesman', createdAt: new Date('2026-03-22').toISOString(), password: 'administrator' },
 ];
 
 const readStoredCollection = <T,>(key: string, fallback: T): T => {
@@ -344,7 +344,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       fullName: u.fullName || u.username || 'User',
       role: normalizeUserRole(u.role),
       username: u.username === 'admin' ? 'administrator' : (u.username || 'user'),
-      email: u.email || `${u.username}@dreamspos.local`,
+      email: u.email || `${u.username}@ismailtrading.local`,
     }));
   });
 
@@ -357,7 +357,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       fullName: savedCurrentUser.fullName || savedCurrentUser.username || 'User',
       role: normalizeUserRole(savedCurrentUser.role),
       username: savedCurrentUser.username === 'admin' ? 'administrator' : (savedCurrentUser.username || 'user'),
-      email: savedCurrentUser.email || `${savedCurrentUser.username}@dreamspos.local`,
+      email: savedCurrentUser.email || `${savedCurrentUser.username}@ismailtrading.local`,
     };
   });
 

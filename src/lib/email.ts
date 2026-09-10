@@ -12,7 +12,7 @@ interface SendEmailValues {
 export async function sendEmail({ to, subject, text }: SendEmailValues) {
   try {
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "inventory@dreamspos.com",
+      from: process.env.RESEND_FROM_EMAIL || "inventory@ismailtrading.com",
       to,
       subject,
       text,

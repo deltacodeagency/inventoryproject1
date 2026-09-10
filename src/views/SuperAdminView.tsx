@@ -227,7 +227,7 @@ export const SuperAdminView: React.FC = () => {
                   <input
                     type="email"
                     required
-                    placeholder="e.g. john@dreamspos.com"
+                    placeholder="e.g. john@ismailtrading.com"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded-lg p-2 text-xs font-semibold text-slate-700 focus:outline-none transition-all"
