@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         }`}
       >
       {/* Brand Header */}
-      <div className="p-5 border-b border-slate-700/50 flex items-center space-x-3 bg-[#141E30]/60">
+      <div className="hidden p-5 border-b border-slate-700/50 md:flex items-center space-x-3 bg-[#141E30]/60">
         <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/15">
           IT
         </div>
