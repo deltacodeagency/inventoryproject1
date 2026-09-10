@@ -86,7 +86,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
 
           </section>
 
-          <section className="relative mx-auto w-full max-w-lg" aria-label="A modern workspace preview">
+          <section className="relative mx-auto hidden w-full max-w-lg lg:block" aria-label="A modern workspace preview">
             <div className="absolute -right-8 top-8 h-40 w-40 rounded-full bg-fuchsia-500/20 blur-3xl" />
             <div className="absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-cyan-500/15 blur-3xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#19223d] via-[#111a32] to-[#0a1124] p-3 shadow-2xl shadow-black/40 sm:p-5">
