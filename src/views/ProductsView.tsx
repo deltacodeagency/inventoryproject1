@@ -725,6 +725,7 @@ export const ProductsView: React.FC = () => {
       }
 
       const parsedProducts: any[] = [];
+      const importedSkus = new Set<string>();
 
       for (let i = 1; i < rows.length; i++) {
         const rowData = rows[i];
@@ -798,7 +799,15 @@ export const ProductsView: React.FC = () => {
         const cost = Math.round(Number(rowObj['cost'])) || 0;
         const stock = Math.round(Number(rowObj['stock'])) || 0;
         const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
-        const sku = rowObj['model'] ?? rowObj['sku'] ?? '';
+        const rawSku = (rowObj['model'] || rowObj['sku'] || '').trim();
+        const baseSku = rawSku || `IMPORT-${Date.now()}-${rowData.rowNumber}`;
+        let sku = baseSku;
+        let duplicateNumber = 2;
+        while (importedSkus.has(sku.toLowerCase())) {
+          sku = `${baseSku}-${duplicateNumber}`;
+          duplicateNumber += 1;
+        }
+        importedSkus.add(sku.toLowerCase());
         const description = rowObj['description'] || '';
 
         parsedProducts.push({
@@ -842,6 +851,7 @@ export const ProductsView: React.FC = () => {
     }
     
     const parsedProducts: any[] = [];
+    const importedSkus = new Set<string>();
     
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -933,7 +943,15 @@ export const ProductsView: React.FC = () => {
       const cost = Math.round(Number(rowObj['cost'])) || 0;
       const stock = Math.round(Number(rowObj['stock'])) || 0;
       const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
-      const sku = rowObj['model'] ?? rowObj['sku'] ?? '';
+      const rawSku = (rowObj['model'] || rowObj['sku'] || '').trim();
+      const baseSku = rawSku || `IMPORT-${Date.now()}-${i + 1}`;
+      let sku = baseSku;
+      let duplicateNumber = 2;
+      while (importedSkus.has(sku.toLowerCase())) {
+        sku = `${baseSku}-${duplicateNumber}`;
+        duplicateNumber += 1;
+      }
+      importedSkus.add(sku.toLowerCase());
       const description = rowObj['description'] || '';
       
       parsedProducts.push({

@@ -429,11 +429,12 @@ async function persistCollection(collection, records = []) {
     }
 
     if (collection === 'products') {
-      const sku = cleaned.sku || cleaned.id;
+      const productId = cleaned.id || `prod-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const sku = String(cleaned.sku || productId).trim();
       const createdBy = normalizeAuditIdentity(cleaned.createdBy);
 
       const prod = await prisma.product.upsert({
-        where: { id: cleaned.id },
+        where: { id: productId },
         update: {
           name: cleaned.name,
           description: cleaned.description || '',
@@ -450,7 +451,7 @@ async function persistCollection(collection, records = []) {
           updatedAt: new Date(),
         },
         create: {
-          id: cleaned.id,
+          id: productId,
           sku,
           name: cleaned.name,
           description: cleaned.description || '',
