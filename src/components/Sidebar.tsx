@@ -135,23 +135,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed left-0 top-16 bottom-0 w-64 bg-[#1B283F] border-r border-slate-700/50 text-slate-300 h-[calc(100dvh-4rem)] overflow-y-auto flex flex-col z-50 md:inset-y-0 md:h-screen md:z-20 select-none transition-transform duration-300 md:transition-none md:translate-x-0 md:sticky md:top-0 md:flex flex-shrink-0 ${
+        className={`fixed left-0 top-16 bottom-0 w-64 bg-[#101a2d] border-r border-slate-700/60 text-slate-300 h-[calc(100dvh-4rem)] overflow-y-auto flex flex-col z-50 md:inset-y-0 md:h-screen md:z-20 select-none transition-transform duration-300 md:transition-none md:translate-x-0 md:sticky md:top-0 md:flex shrink-0 ${
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
       {/* Brand Header */}
-      <div className="hidden p-5 border-b border-slate-700/50 md:flex items-center space-x-3 bg-[#141E30]/60">
-        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/15">
+      <div className="hidden p-4 border-b border-slate-700/60 md:flex items-center gap-3 bg-[#0c1527]">
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-black shadow-lg shadow-blue-500/20">
           IT
         </div>
-        <div>
-          <h1 className="font-bold text-white tracking-tight text-lg">ISMAIL TRADING</h1>
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold block -mt-1">Accessories &amp; Dealership</span>
+        <div className="min-w-0">
+          <h1 className="font-black text-white tracking-tight text-base leading-5 whitespace-nowrap">ISMAIL TRADING</h1>
+          <span className="text-[9px] uppercase tracking-[0.12em] text-blue-300/70 font-bold block mt-0.5 whitespace-nowrap">Accessories &amp; Dealership</span>
         </div>
       </div>
 
       {/* Navigation Groupings */}
-      <div className="flex-1 px-3 py-4 space-y-3">
+      <div className="flex-1 px-3 py-5 space-y-4">
         {sections.map((section) => {
           // Filter items based on current user role
           const filteredItems = section.items.filter((item) => {
@@ -174,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
               {/* Group Header */}
               <button
                 onClick={() => toggleSection(section.title)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.16em] hover:text-slate-300 transition-colors"
               >
                 <span>{section.title}</span>
                 {section.isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
@@ -182,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
 
               {/* Group Items */}
               {section.isOpen && (
-                <div className="space-y-[2px] mt-1 pl-1">
+                <div className="space-y-1 mt-1 pl-1">
                   {filteredItems.map((item) => {
                     const isActive = activeView === item.id;
                     const Icon = item.icon;
@@ -196,10 +196,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
                           setIsMobileSidebarOpen(false);
                           onNavigate?.(pathByView[item.id] || `/${item.id}`);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-all duration-150 group ${
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] transition-all duration-150 group ${
                           isActive
-                            ? 'bg-blue-600 text-white font-medium shadow-md shadow-blue-600/10'
-                            : 'hover:bg-slate-800 hover:text-white text-slate-400'
+                            ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-600/20'
+                            : 'hover:bg-white/6 hover:text-white text-slate-400'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -221,8 +221,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
       </div>
 
       {/* Footer Profile Shortcut */}
-      <div className="p-4 bg-[#141E30] border-t border-slate-700/50 flex space-x-3 items-center">
-        <div className="w-8 h-8 rounded-full bg-slate-500 border border-slate-400 flex items-center justify-center font-bold text-xs text-white uppercase">
+      <div className="p-4 bg-[#0c1527] border-t border-slate-700/60 flex gap-3 items-center">
+        <div className="w-9 h-9 shrink-0 rounded-xl bg-slate-700 border border-slate-600 flex items-center justify-center font-bold text-xs text-white uppercase">
           {currentUser?.username ? currentUser.username.slice(0, 2) : 'US'}
         </div>
         <div className="flex-1 overflow-hidden">

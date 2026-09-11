@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS "Product_sku_key";

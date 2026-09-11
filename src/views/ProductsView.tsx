@@ -558,8 +558,8 @@ export const ProductsView: React.FC = () => {
 
       // Define columns
       worksheet.columns = [
-        { header: 'sku', key: 'sku', width: 15 },
         { header: 'name', key: 'name', width: 25 },
+        { header: 'model', key: 'model', width: 20 },
         { header: 'description', key: 'description', width: 35 },
         { header: 'category', key: 'category', width: 20 },
         { header: 'brand', key: 'brand', width: 20 },
@@ -586,8 +586,8 @@ export const ProductsView: React.FC = () => {
       const sampleSupplier = suppliers.find(s => s.id === importSupplierId)?.name || suppliers[0]?.name || 'TechSource';
 
       worksheet.addRow({
-        sku: 'APL-14P-001',
         name: 'iPhone 14 Pro',
+        model: 'APL-14P-001',
         description: 'Flagship Apple smartphone with Dynamic Island',
         category: sampleCategory,
         brand: sampleBrand,
@@ -599,8 +599,8 @@ export const ProductsView: React.FC = () => {
       });
 
       worksheet.addRow({
-        sku: 'MAC-AIR-002',
         name: 'MacBook Air M2',
+        model: 'MAC-AIR-002',
         description: 'Ultra-slim laptop with Apple M2 silicon chip',
         category: sampleCategory,
         brand: sampleBrand,
@@ -798,7 +798,7 @@ export const ProductsView: React.FC = () => {
         const cost = Math.round(Number(rowObj['cost'])) || 0;
         const stock = Math.round(Number(rowObj['stock'])) || 0;
         const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
-        const sku = rowObj['sku'] || '';
+        const sku = rowObj['model'] ?? rowObj['sku'] ?? '';
         const description = rowObj['description'] || '';
 
         parsedProducts.push({
@@ -933,7 +933,7 @@ export const ProductsView: React.FC = () => {
       const cost = Math.round(Number(rowObj['cost'])) || 0;
       const stock = Math.round(Number(rowObj['stock'])) || 0;
       const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
-      const sku = rowObj['sku'] || '';
+      const sku = rowObj['model'] ?? rowObj['sku'] ?? '';
       const description = rowObj['description'] || '';
       
       parsedProducts.push({

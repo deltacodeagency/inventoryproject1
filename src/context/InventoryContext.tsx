@@ -60,8 +60,8 @@ interface InventoryContextType {
   checkoutCart: (customerName: string, paymentMethod: 'Cash' | 'Card' | 'Mobile' | 'bKash' | 'Nagad' | 'Rocket', paidAmount: number) => Sale | null;
 
   // Mutators
-  addProduct: (p: Omit<Product, 'id' | 'sku'>) => void;
-  addMultipleProducts: (list: (Omit<Product, 'id' | 'sku'> & { sku?: string })[]) => void;
+  addProduct: (p: Omit<Product, 'id'>) => void;
+  addMultipleProducts: (list: Omit<Product, 'id'>[]) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   deleteProducts: (ids: string[]) => void;
@@ -581,22 +581,14 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   // Product CRUD
-  const addProduct = (p: Omit<Product, 'id' | 'sku'>) => {
+  const addProduct = (p: Omit<Product, 'id'>) => {
     if (!assertNotSalesman('add products')) return;
-    const category = categories.find((c) => c.id === p.categoryId);
-    const brand = brands.find((b) => b.id === p.brandId);
-    
-    const catCode = category ? category.code : 'GEN';
-    const brandCode = brand ? brand.name.substring(0, 3).toUpperCase() : 'GEN';
-    const count = products.filter((pr) => pr.categoryId === p.categoryId).length + 1;
-    const sku = `${catCode}-${brandCode}-${String(count).padStart(3, '0')}`;
 
     const id = `prod-${Date.now()}`;
     const createdAt = new Date().toISOString();
     const newProd: Product = {
       ...p,
       id,
-      sku,
       createdBy: currentUser?.username || 'administrator',
       createdAt,
       updatedAt: createdAt,
@@ -614,7 +606,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     addAlert('system', 'New Product Created', `${newProd.name} (SKU: ${newProd.sku}) has been added.`, newProd.id);
   };
 
-  const addMultipleProducts = (list: (Omit<Product, 'id' | 'sku'> & { sku?: string })[]) => {
+  const addMultipleProducts = (list: Omit<Product, 'id'>[]) => {
     if (!assertNotSalesman('add products')) return;
     
     setProducts((prev) => {
@@ -622,22 +614,11 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const addedProductNames: string[] = [];
       
       list.forEach((p, idx) => {
-        const category = categories.find((c) => c.id === p.categoryId);
-        const brand = brands.find((b) => b.id === p.brandId);
-        
-        const catCode = category ? category.code : 'GEN';
-        const brandCode = brand ? brand.name.substring(0, 3).toUpperCase() : 'GEN';
-        
-        const count = currentProducts.filter((pr) => pr.categoryId === p.categoryId).length + 1;
-        const generatedSku = `${catCode}-${brandCode}-${String(count).padStart(3, '0')}`;
-        const sku = p.sku || generatedSku;
-        
         const id = `prod-${Date.now()}-${idx}`;
         const createdAt = new Date().toISOString();
         const newProd: Product = {
           ...p,
           id,
-          sku,
           createdBy: currentUser?.username || 'administrator',
           createdAt,
           updatedAt: createdAt,
@@ -697,7 +678,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           const finalCost = firstActive ? firstActive.cost : (p.cost !== undefined ? p.cost : prod.cost);
           const finalPrice = firstActive ? firstActive.price : (p.price !== undefined ? p.price : prod.price);
 
-          const updated: Product = { 
+          const updated: Product = {
             ...prod, 
             ...p,
             cost: finalCost,

@@ -4,14 +4,10 @@ import {
   ArrowUpRight,
   AlertTriangle,
   Boxes,
-  Building2,
   CheckCircle2,
   ChevronDown,
-  Database,
-  FileSpreadsheet,
   LogIn,
   MonitorCheck,
-  ShieldCheck,
   Sparkles,
   Store,
   TrendingUp,
@@ -25,15 +21,15 @@ interface HomeViewProps {
 const features = [
   { icon: MonitorCheck, title: 'POS Terminal', detail: 'Barcode & Print', color: 'text-blue-400' },
   { icon: Boxes, title: 'FIFO Inventory', detail: 'Batch Costing', color: 'text-emerald-400' },
-  { icon: Building2, title: 'Multi-Branch', detail: 'Stock Transfer', color: 'text-purple-400' },
-  { icon: FileSpreadsheet, title: 'Sales Reports', detail: 'Profit & COGS', color: 'text-amber-400' },
-  { icon: Database, title: 'PostgreSQL', detail: 'Prisma Schema', color: 'text-cyan-400' },
-  { icon: ShieldCheck, title: 'Better Auth', detail: 'Secure Sessions', color: 'text-rose-400' },
+  { icon: TrendingUp, title: 'Stock Control', detail: 'Adjustments & Alerts', color: 'text-purple-400' },
+  { icon: Store, title: 'Supplier Setup', detail: 'Vendors & Brands', color: 'text-amber-400' },
+  { icon: AlertTriangle, title: 'Low Stock', detail: 'Restock Reminders', color: 'text-cyan-400' },
+  { icon: CheckCircle2, title: 'Sales Returns', detail: 'Quick Processing', color: 'text-rose-400' },
 ];
 
 export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) => {
   return (
-    <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden overflow-y-auto bg-slate-950 font-sans text-slate-100 selection:bg-blue-500 selection:text-white">
+    <div className="relative flex min-h-dvh w-full flex-col overflow-x-hidden bg-slate-950 font-sans text-slate-100 selection:bg-blue-500 selection:text-white">
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-blue-600/15 blur-[120px] sm:h-96 sm:w-96" />
       <div className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-indigo-600/15 blur-[140px]" />
 
@@ -62,7 +58,9 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
 
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
         <div className="grid w-full items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:gap-16">
-          <section className="text-center lg:text-left">
+          <section className="relative text-center lg:text-left">
+            <div className="pointer-events-none absolute -left-24 top-10 -z-10 h-72 w-72 rounded-full bg-blue-500/10 blur-[90px]" />
+            <div className="pointer-events-none absolute -bottom-16 left-1/4 -z-10 h-48 w-48 rounded-full bg-cyan-400/5 blur-[70px]" />
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-[10px] font-bold text-slate-300 shadow-xl backdrop-blur-md sm:text-xs">
               <Sparkles className="h-3.5 w-3.5 animate-pulse text-blue-400 sm:h-4 sm:w-4" />
               <span>Local Shop Inventory & POS Management</span>
@@ -70,10 +68,10 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
             </div>
 
             <h1 className="mx-auto max-w-3xl text-[clamp(2.35rem,8vw,4.75rem)] font-black leading-[1.05] tracking-[-0.04em] text-white lg:mx-0">
-              Smart control for your <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">retail business.</span>
+              ISMAIL <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">TRDING</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-sm font-medium leading-7 text-slate-400 sm:text-base lg:mx-0">
-              High-performance point of sale, FIFO batch costing, multi-branch stock transfers, and automated inventory alerts—all backed by secure, reliable infrastructure.
+            <p className="mx-auto mt-6 max-w-xl text-xl font-semibold leading-8 tracking-wide text-blue-200 sm:text-2xl lg:mx-0">
+              Accessories &amp; Dealership
             </p>
 
             <div className="mx-auto mt-7 flex w-full max-w-md flex-col gap-3 sm:flex-row lg:mx-0">
@@ -82,6 +80,20 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
                 <span>Get started</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
+            </div>
+
+            <div className="mx-auto mt-10 grid max-w-md grid-cols-2 gap-x-6 gap-y-4 border-t border-white/10 pt-6 sm:grid-cols-3 lg:mx-0 lg:max-w-xl">
+              {features.slice(0, 6).map(({ icon: Icon, title, detail, color }) => (
+                <div key={title} className="group flex items-center gap-2.5 text-left">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] ${color} transition-colors group-hover:border-white/20`}>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[10px] font-bold text-slate-200">{title}</span>
+                    <span className="block truncate text-[9px] text-slate-500">{detail}</span>
+                  </span>
+                </div>
+              ))}
             </div>
 
           </section>
@@ -144,7 +156,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate, currentUser }) =
         </div>
       </main>
 
-      <footer className="relative z-20 mt-auto border-t border-slate-800/80 bg-slate-950 px-4 py-3 text-center text-[10px] font-medium text-slate-500 shrink-0">
+      <footer className="relative z-20 mt-auto shrink-0 border-t border-slate-800/80 bg-slate-950 px-4 py-3 text-center text-[10px] font-medium text-slate-500">
         <span>© 2026 ISMAIL TRADING. All rights reserved.</span>
       </footer>
     </div>

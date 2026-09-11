@@ -330,28 +330,6 @@ export const CreateProductView: React.FC = () => {
     }
   }, [editingProduct, categories, brands, suppliers]);
 
-  // Dynamic SKU preview and automatic generation
-  useEffect(() => {
-    if (editingProduct) return; // Do not auto-generate SKU if we are editing an existing product
-    
-    const category = categories.find((c) => c.id === categoryId);
-    const brand = brands.find((b) => b.id === brandId);
-    
-    const catCode = category ? category.code : 'GEN';
-    const brandCode = brand ? brand.name.substring(0, 3).toUpperCase() : 'GEN';
-    const count = products.filter((pr) => pr.categoryId === categoryId).length + 1;
-    const autoSku = `${catCode}-${brandCode}-${String(count).padStart(3, '0')}`;
-    setSku(autoSku);
-  }, [categoryId, brandId, categories, brands, products, editingProduct]);
-
-  // Generates a random SKU when the orange "Generate" button is clicked
-  const handleGenerateSku = () => {
-    const category = categories.find((c) => c.id === categoryId);
-    const catCode = category ? category.code : 'PROD';
-    const randomNum = Math.floor(100000 + Math.random() * 900000);
-    setSku(`${catCode}-${randomNum}`);
-  };
-
   // Handles adding a category inline
   const handleAddCategorySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -552,6 +530,7 @@ export const CreateProductView: React.FC = () => {
       // Call inventory manager
       addProduct({
         name,
+        sku,
         description: description || 'Standard retail product item.',
         categoryId,
         brandId,
@@ -794,28 +773,19 @@ export const CreateProductView: React.FC = () => {
                   />
                 </div>
 
-                {/* SKU * with Generate Button */}
+                {/* Model * */}
                 <div className="space-y-1.5">
                   <label className="block text-slate-700 font-bold text-xs">
-                    SKU <span className="text-red-500 font-bold">*</span>
+                    Model <span className="text-red-500 font-bold">*</span>
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      required
-                      placeholder="SKU code"
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 shadow-sm bg-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleGenerateSku}
-                      className="px-4 py-2 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-sm cursor-pointer"
-                    >
-                      Generate
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter model"
+                    value={sku}
+                    onChange={(e) => setSku(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 shadow-sm bg-white"
+                  />
                 </div>
 
                 {/* Category * with Inline Add link */}

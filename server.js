@@ -433,7 +433,7 @@ async function persistCollection(collection, records = []) {
       const createdBy = normalizeAuditIdentity(cleaned.createdBy);
 
       const prod = await prisma.product.upsert({
-        where: { sku },
+        where: { id: cleaned.id },
         update: {
           name: cleaned.name,
           description: cleaned.description || '',
