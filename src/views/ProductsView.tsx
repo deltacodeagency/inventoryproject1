@@ -796,7 +796,7 @@ export const ProductsView: React.FC = () => {
         }
 
         const price = Math.round(Number(rowObj['price'])) || 0;
-        const cost = Math.round(Number(rowObj['cost'])) || 0;
+        const cost = Number(rowObj['cost']) || 0;
         const stock = Math.round(Number(rowObj['stock'])) || 0;
         const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
         const rawSku = (rowObj['model'] || rowObj['sku'] || '').trim();
@@ -940,7 +940,7 @@ export const ProductsView: React.FC = () => {
       }
       
       const price = Math.round(Number(rowObj['price'])) || 0;
-      const cost = Math.round(Number(rowObj['cost'])) || 0;
+      const cost = Number(rowObj['cost']) || 0;
       const stock = Math.round(Number(rowObj['stock'])) || 0;
       const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
       const rawSku = (rowObj['model'] || rowObj['sku'] || '').trim();
