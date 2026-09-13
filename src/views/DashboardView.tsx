@@ -45,7 +45,7 @@ const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({
     return () => animation.stop();
   }, [value, animateValue]);
 
-  return <>৳{Math.round(displayValue).toLocaleString()}</>;
+  return <>৳{displayValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
 };
 
 export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateValues = true }) => {
@@ -154,7 +154,7 @@ export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateVa
   // COGS & Profit
   const cogsVal = useMemo(() => {
     return sales.reduce((sum, s) => {
-      if (s.costOfGoodsSold) return sum + s.costOfGoodsSold;
+      if (s.costOfGoodsSold !== undefined) return sum + s.costOfGoodsSold;
       const saleCost = (s.items || []).reduce((iSum, item) => {
         const prod = products.find(p => p.id === item.productId);
         const itemCost = item.cost || prod?.cost || (item.price * 0.7);
@@ -614,7 +614,7 @@ export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateVa
             {currentUser?.role !== 'Salesman' && (
               <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl">
                 <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wide">Profit</span>
-                <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchaseProfit.toLocaleString()}</h3>
+                <h3 className="mt-1 text-xl sm:text-2xl font-black text-slate-900">৳{salesPurchaseProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                 <span className="text-[11px] text-slate-500">Sales minus cost of goods for selected range.</span>
               </div>
             )}
