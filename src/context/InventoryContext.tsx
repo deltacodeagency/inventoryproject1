@@ -58,6 +58,7 @@ interface InventoryContextType {
   cartTaxRate: number; // e.g. 0.08 for 8%
   setCartTaxRate: (rate: number) => void;
   checkoutCart: (customerName: string, paymentMethod: 'Cash' | 'Card' | 'Mobile' | 'bKash' | 'Nagad' | 'Rocket', paidAmount: number) => Sale | null;
+  clearSaleDue: (saleId: string) => void;
 
   // Mutators
   addProduct: (p: Omit<Product, 'id'>) => void;
@@ -906,6 +907,15 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return newSale;
   };
 
+  const clearSaleDue = (saleId: string) => {
+    setSales((prev) => prev.map((sale) => (
+      sale.id === saleId
+        ? { ...sale, paidAmount: sale.total, status: 'Paid' as const }
+        : sale
+    )));
+    addAlert('sales', 'Due Payment Cleared', 'The customer due payment was marked as fully paid.');
+  };
+
   // Purchase Order Add
   const addPurchase = (pur: Omit<Purchase, 'id' | 'purchaseNo' | 'date'>) => {
     if (!assertNotSalesman('create purchase orders')) return;
@@ -1375,6 +1385,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         cartTaxRate,
         setCartTaxRate,
         checkoutCart,
+        clearSaleDue,
         addProduct,
         addMultipleProducts,
         updateProduct,

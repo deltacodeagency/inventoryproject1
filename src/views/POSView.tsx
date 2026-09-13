@@ -14,7 +14,8 @@ import {
   Printer,
   Sparkles,
   Percent,
-  Calculator
+  Calculator,
+  Pencil
 } from 'lucide-react';
 import { TakaIcon } from '../components/TakaIcon';
 import { Product, Sale } from '../types';
@@ -52,6 +53,8 @@ export const POSView: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Mobile'>('Cash');
   const [mobileOption, setMobileOption] = useState<'bKash' | 'Nagad' | 'Rocket'>('bKash');
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [isEditingPaymentAmount, setIsEditingPaymentAmount] = useState(false);
   const [invoiceReceipt, setInvoiceReceipt] = useState<Sale | null>(null);
   const [quantityDrafts, setQuantityDrafts] = useState<Record<string, string>>({});
   const [discountMode, setDiscountMode] = useState<'percentage' | 'amount'>('amount');
@@ -64,7 +67,9 @@ export const POSView: React.FC = () => {
   const calculatedDiscount = discountMode === 'percentage'
     ? Math.min(cartSubtotal, cartSubtotal * Math.min(discountValue, 100) / 100)
     : Math.min(cartSubtotal, discountValue);
-  const cartTotal = Math.max(0, Math.round((cartSubtotal - cartDiscount) * 100) / 100);
+  const cartTotal = Math.max(0, Math.round(cartSubtotal - cartDiscount));
+  const parsedPaymentAmount = Math.min(cartTotal, Math.max(0, Math.floor(Number(paymentAmount) || 0)));
+  const dueAmount = Math.max(0, cartTotal - parsedPaymentAmount);
   const discountInputMax = discountMode === 'percentage' ? 100 : cartSubtotal;
 
   useEffect(() => {
@@ -228,6 +233,25 @@ export const POSView: React.FC = () => {
           <span>Paid Amount:</span>
           <span>৳${Math.round(receipt.paidAmount)}</span>
         </div>
+        ${
+          receipt.paidAmount < receipt.total
+            ? `
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #dc2626; font-weight: bold;">
+          <span>Due Amount:</span>
+          <span>৳${Math.round(receipt.total - receipt.paidAmount)}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #dc2626;">
+          <span>Payment Status:</span>
+          <span>PARTIAL / DUE</span>
+        </div>
+        `
+            : `
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #059669;">
+          <span>Payment Status:</span>
+          <span>PAID IN FULL</span>
+        </div>
+        `
+        }
 
         <div style="border-bottom: 1px dashed #94a3b8; margin: 10px 0;"></div>
         <div style="margin-top: 16px; font-size: 10px; color: #64748b; text-align: center;">
@@ -296,10 +320,15 @@ export const POSView: React.FC = () => {
     const finalCustomer = displayCustomerName(rawCustomer);
     const finalMethod = paymentMethod === 'Cash' ? 'Cash' : mobileOption;
 
+    if (parsedPaymentAmount > cartTotal) {
+      addAlert('system', 'Invalid Payment Amount', 'Paid amount cannot be greater than the receipt grand total.');
+      return;
+    }
+
     const receipt = checkoutCart(
       finalCustomer,
       finalMethod,
-      cartTotal
+      parsedPaymentAmount
     );
 
     if (receipt) {
@@ -312,7 +341,15 @@ export const POSView: React.FC = () => {
       setCustomCustomerName('');
       setPaymentMethod('Cash');
       setMobileOption('bKash');
+      setPaymentAmount('');
+      setIsEditingPaymentAmount(false);
     }
+  };
+
+  const openPaymentModal = () => {
+    setPaymentAmount(String(cartTotal));
+    setIsEditingPaymentAmount(false);
+    setShowPaymentModal(true);
   };
 
   return (
@@ -361,7 +398,7 @@ export const POSView: React.FC = () => {
             <span className="font-black text-sm text-blue-600">৳{Math.round(cartTotal)}</span>
           </div>
           <button
-            onClick={() => setShowPaymentModal(true)}
+            onClick={openPaymentModal}
             disabled={cart.length === 0}
             className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-black text-xs hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 disabled:shadow-none transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
           >
@@ -679,9 +716,45 @@ export const POSView: React.FC = () => {
             </div>
 
             <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1 text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="space-y-2 text-center py-2 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">Receipt Grand Total</span>
-                <p className="text-xl font-black text-blue-600">৳{Math.round(cartTotal)}</p>
+                <p className="text-xl font-black text-blue-600">৳{cartTotal.toLocaleString()}</p>
+                {!isEditingPaymentAmount ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPaymentAmount(true)}
+                    className="mx-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-blue-200 bg-white text-blue-600 font-bold text-xs hover:bg-blue-50 transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    <span>Edit Payment / Add Due</span>
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-[11px] font-bold">
+                      <span className="text-slate-500">Paid Amount:</span>
+                      <input
+                        autoFocus
+                        type="number"
+                        min="0"
+                        max={cartTotal}
+                        step="1"
+                        value={paymentAmount}
+                        onChange={(e) => {
+                          const nextAmount = Math.floor(Number(e.target.value));
+                          setPaymentAmount(
+                            e.target.value === ''
+                              ? ''
+                              : String(Math.min(Math.max(0, nextAmount || 0), cartTotal))
+                          );
+                        }}
+                        className="w-24 text-center font-bold bg-white border border-blue-300 rounded px-2 py-1 outline-none"
+                      />
+                    </div>
+                    <p className={`text-xs font-black ${dueAmount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      Due Amount: ৳{dueAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Optional Customer Name Input */}
@@ -731,7 +804,7 @@ export const POSView: React.FC = () => {
               {paymentMethod === 'Cash' && (
                 <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-800 space-y-1 text-center">
                   <p className="font-bold text-xs">Cash Payment Selected</p>
-                  <p className="text-[11px] text-emerald-600">Collect ৳{Math.round(cartTotal)} cash from customer.</p>
+                  <p className="text-[11px] text-emerald-600">Collect ৳{parsedPaymentAmount.toFixed(2)} cash from customer.</p>
                 </div>
               )}
 
@@ -862,6 +935,16 @@ export const POSView: React.FC = () => {
                 <div className="flex justify-between font-bold text-blue-600">
                   <span>Payment ({invoiceReceipt.paymentMethod}):</span>
                   <span>৳{Math.round(invoiceReceipt.paidAmount)}</span>
+                </div>
+                {invoiceReceipt.paidAmount < invoiceReceipt.total && (
+                  <div className="flex justify-between font-bold text-rose-600">
+                    <span>Due Amount:</span>
+                    <span>৳{Math.round(invoiceReceipt.total - invoiceReceipt.paidAmount)}</span>
+                  </div>
+                )}
+                <div className={`flex justify-between font-bold ${invoiceReceipt.paidAmount < invoiceReceipt.total ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  <span>Payment Status:</span>
+                  <span>{invoiceReceipt.paidAmount < invoiceReceipt.total ? 'PARTIAL / DUE' : 'PAID IN FULL'}</span>
                 </div>
               </div>
             </div>

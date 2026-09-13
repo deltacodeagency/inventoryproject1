@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Sale, Product } from '../types';
 import { displayCustomerName } from './POSView';
+import Swal from 'sweetalert2';
 
 // ==========================================
 // 1. OFFLINE SALES COMPONENT
@@ -115,7 +116,7 @@ export const OfflineSalesView: React.FC = () => {
 // 2. INVOICE VIEW COMPONENT
 // ==========================================
 export const InvoiceView: React.FC = () => {
-  const { sales } = useInventory();
+  const { sales, clearSaleDue } = useInventory();
   const [activeInvoice, setActiveInvoice] = useState<Sale | null>(null);
 
   return (
@@ -136,6 +137,7 @@ export const InvoiceView: React.FC = () => {
                 <th className="p-4">Date / Time</th>
                 <th className="p-4 text-right">Discount</th>
                 <th className="p-4 text-right">Grand Total</th>
+                <th className="p-4 text-right">Due Amount</th>
                 <th className="p-4 text-center">Action</th>
               </tr>
             </thead>
@@ -148,6 +150,31 @@ export const InvoiceView: React.FC = () => {
                   <td className="p-4 text-slate-400">{new Date(sale.date).toLocaleString()}</td>
                   <td className="p-4 text-right font-medium text-rose-500">{sale.discount > 0 ? `-$${sale.discount.toFixed(2)}` : '—'}</td>
                   <td className="p-4 text-right font-black text-slate-800">${sale.total.toFixed(2)}</td>
+                  <td className="p-4 text-right">
+                    {sale.total > sale.paidAmount ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          Swal.fire({
+                            icon: 'question',
+                            title: 'Clear customer due?',
+                            text: `Mark ৳${Math.round(sale.total - sale.paidAmount)} as paid for ${sale.invoiceNo}?`,
+                            showCancelButton: true,
+                            confirmButtonText: 'Clear Due',
+                            confirmButtonColor: '#2563eb',
+                          }).then((result) => {
+                            if (result.isConfirmed) clearSaleDue(sale.id);
+                          });
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-emerald-50 hover:text-emerald-600 font-black transition-colors"
+                        title="Click to clear this customer due"
+                      >
+                        ৳{Math.round(sale.total - sale.paidAmount)}
+                      </button>
+                    ) : (
+                      <span className="font-black text-emerald-600">৳0</span>
+                    )}
+                  </td>
                   <td className="p-4 text-center">
                     <button
                       onClick={() => setActiveInvoice(sale)}
@@ -232,6 +259,12 @@ export const InvoiceView: React.FC = () => {
                   <span>Payment ({activeInvoice.paymentMethod}):</span>
                   <span>৳{Math.round(activeInvoice.paidAmount)}</span>
                 </div>
+                {activeInvoice.paidAmount < activeInvoice.total && (
+                  <div className="flex justify-between font-bold text-rose-600">
+                    <span>Due Amount:</span>
+                    <span>৳{Math.round(activeInvoice.total - activeInvoice.paidAmount)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -376,7 +409,7 @@ export const InvoiceView: React.FC = () => {
 // 3. SALES HISTORY COMPONENT
 // ==========================================
 export const SalesView: React.FC = () => {
-  const { sales } = useInventory();
+  const { sales, clearSaleDue } = useInventory();
   const [search, setSearch] = useState('');
 
   const filteredSales = sales.filter((s) => {
@@ -417,6 +450,7 @@ export const SalesView: React.FC = () => {
                 <th className="p-4">Customer</th>
                 <th className="p-4">Payment Option</th>
                 <th className="p-4 text-right">Amount</th>
+                <th className="p-4 text-right">Due</th>
                 <th className="p-4 text-center">Status</th>
               </tr>
             </thead>
@@ -428,6 +462,31 @@ export const SalesView: React.FC = () => {
                   <td className="p-4 font-semibold text-slate-800">{sale.customerName}</td>
                   <td className="p-4 font-bold text-slate-500">{sale.paymentMethod}</td>
                   <td className="p-4 text-right font-black text-slate-800">৳{Math.round(sale.total)}</td>
+                  <td className="p-4 text-right">
+                    {sale.total > sale.paidAmount ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          Swal.fire({
+                            icon: 'question',
+                            title: 'Clear customer due?',
+                            text: `Mark ৳${Math.round(sale.total - sale.paidAmount)} as paid for ${sale.invoiceNo}?`,
+                            showCancelButton: true,
+                            confirmButtonText: 'Clear Due',
+                            confirmButtonColor: '#2563eb',
+                          }).then((result) => {
+                            if (result.isConfirmed) clearSaleDue(sale.id);
+                          });
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-emerald-50 hover:text-emerald-600 font-black transition-colors"
+                        title="Click to clear this customer due"
+                      >
+                        ৳{Math.max(0, Math.round(sale.total - sale.paidAmount))}
+                      </button>
+                    ) : (
+                      <span className="font-black text-emerald-600">৳0</span>
+                    )}
+                  </td>
                   <td className="p-4 text-center">
                     <span
                       className={`px-2 py-0.5 rounded text-[9px] font-bold ${
