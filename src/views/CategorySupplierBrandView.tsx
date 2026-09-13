@@ -665,12 +665,15 @@ export const SupplierView: React.FC = () => {
                 <th className="p-4">Contact Detail</th>
                 <th className="p-4">Logistics Address</th>
                 <th className="p-4 text-center">Linked Products</th>
+                <th className="p-4 text-center">Total Quantity</th>
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {suppliers.map((sup) => {
-                const count = products.filter((p) => p.supplierId === sup.id).length;
+                const supplierProducts = products.filter((p) => p.supplierId === sup.id);
+                const count = supplierProducts.length;
+                const totalQuantity = supplierProducts.reduce((total, product) => total + product.stock, 0);
                 const isSelected = selectedSupplierIds.includes(sup.id);
                 return (
                   <tr
@@ -730,6 +733,13 @@ export const SupplierView: React.FC = () => {
                     <td className="p-4 text-center">
                       <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px]">
                         {count} items
+                      </span>
+                    </td>
+
+                    {/* Total stock quantity */}
+                    <td className="p-4 text-center">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold text-[10px]">
+                        {totalQuantity} units
                       </span>
                     </td>
 

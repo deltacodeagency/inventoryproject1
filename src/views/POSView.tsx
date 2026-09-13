@@ -58,6 +58,7 @@ export const POSView: React.FC = () => {
   const [discountInput, setDiscountInput] = useState('');
 
   // Cart math
+  const cartTotalQuantity = cart.reduce((total, item) => total + item.quantity, 0);
   const cartSubtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const discountValue = Math.max(0, Number(discountInput) || 0);
   const calculatedDiscount = discountMode === 'percentage'
@@ -442,6 +443,10 @@ export const POSView: React.FC = () => {
         {/* Discount & Tax Footer */}
         {cart.length > 0 && (
           <div className="p-4 bg-slate-50/70 border-t border-slate-100 space-y-2 shrink-0">
+            <div className="flex items-center justify-between space-x-2">
+              <span className="font-bold text-slate-500 text-[11px]">Total Quantity:</span>
+              <span className="font-bold text-slate-800 text-[11px]">{cartTotalQuantity} units</span>
+            </div>
             <div className="flex items-center justify-between space-x-2">
               <span className="font-bold text-slate-500 text-[11px]">Cart Subtotal:</span>
               <span className="font-bold text-slate-800 text-[11px]">৳{Math.round(cartSubtotal)}</span>
