@@ -58,6 +58,8 @@ interface InventoryContextType {
   cartTaxRate: number; // e.g. 0.08 for 8%
   setCartTaxRate: (rate: number) => void;
   checkoutCart: (customerName: string, paymentMethod: 'Cash' | 'Card' | 'Mobile' | 'bKash' | 'Nagad' | 'Rocket', paidAmount: number) => Sale | null;
+  updateSale: (saleId: string, updates: { quantities: Record<string, number>; discount: number }) => Promise<Sale | null>;
+  deleteSale: (saleId: string) => Promise<boolean>;
   clearSaleDue: (saleId: string) => void;
 
   // Mutators
@@ -916,6 +918,105 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     addAlert('sales', 'Due Payment Cleared', 'The customer due payment was marked as fully paid.');
   };
 
+  const deleteSale = async (saleId: string): Promise<boolean> => {
+    if (!assertNotSalesman('delete sales memos')) return false;
+    const sale = sales.find((currentSale) => currentSale.id === saleId);
+    if (!sale) return false;
+
+    const restoredProducts = products.map((product) => ({
+      ...product,
+      batches: ensureProductBatches(product).map((batch) => ({ ...batch })),
+    }));
+    sale.items.forEach((item) => {
+      const product = restoredProducts.find((candidate) => candidate.id === item.productId);
+      if (!product) return;
+      product.stock += item.quantity;
+      product.batches = [...(product.batches || []), {
+        id: `batch-delete-${sale.id}-${item.productId}-${Date.now()}`,
+        quantity: item.quantity,
+        initialQuantity: item.quantity,
+        cost: item.cost ?? product.cost,
+        price: item.price,
+        date: sale.date,
+      }];
+    });
+
+    try {
+      const response = await fetch(`/api/data/sales/${encodeURIComponent(saleId)}`, { method: 'DELETE' });
+      if (!response.ok) return false;
+    } catch {
+      return false;
+    }
+
+    setProducts(restoredProducts);
+    setSales((previousSales) => previousSales.filter((currentSale) => currentSale.id !== saleId));
+    addAlert('sales', 'Invoice Deleted', `Invoice ${sale.invoiceNo} was deleted and stock was restored.`);
+    return true;
+  };
+
+  const updateSale = async (saleId: string, updates: { quantities: Record<string, number>; discount: number }): Promise<Sale | null> => {
+    const sale = sales.find((currentSale) => currentSale.id === saleId);
+    if (!sale || !Number.isFinite(updates.discount) || updates.discount < 0) return null;
+
+    const requestedItems = sale.items.map((item) => ({
+      ...item,
+      quantity: Number(updates.quantities[item.productId] ?? item.quantity),
+    }));
+    if (requestedItems.some((item) => !Number.isInteger(item.quantity) || item.quantity < 0)) return null;
+    const nextItems = requestedItems;
+    if (!nextItems.some((item) => item.quantity > 0)) return null;
+
+    const nextProducts = products.map((product) => ({
+      ...product,
+      batches: ensureProductBatches(product).map((batch) => ({ ...batch })),
+    }));
+
+    for (const item of sale.items) {
+      const product = nextProducts.find((candidate) => candidate.id === item.productId);
+      if (!product) return null;
+      product.batches = [...(product.batches || []), {
+        id: `batch-edit-${sale.id}-${item.productId}-${Date.now()}`,
+        quantity: item.quantity,
+        initialQuantity: item.quantity,
+        cost: item.cost ?? product.cost,
+        price: item.price,
+        date: sale.date,
+      }];
+      product.stock += item.quantity;
+    }
+
+    let costOfGoodsSold = 0;
+    for (const item of nextItems.filter((saleItem) => saleItem.quantity > 0)) {
+      const product = nextProducts.find((candidate) => candidate.id === item.productId);
+      if (!product || item.quantity > product.stock) return null;
+      const consumed = consumeStockFIFO(product, item.quantity);
+      costOfGoodsSold += consumed.totalCost;
+      product.batches = consumed.updatedBatches;
+      product.stock = consumed.newStock;
+      product.cost = consumed.newCost;
+      product.price = consumed.newPrice;
+    }
+
+    const subtotal = nextItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discount = Math.min(updates.discount, subtotal);
+    const total = Math.max(0, Math.round(subtotal - discount));
+    const nextSale: Sale = {
+      ...sale,
+      items: nextItems,
+      subtotal,
+      discount,
+      total,
+      paidAmount: total,
+      status: 'Paid',
+      costOfGoodsSold,
+    };
+
+    setProducts(nextProducts);
+    setSales((previousSales) => previousSales.map((currentSale) => currentSale.id === saleId ? nextSale : currentSale));
+    addAlert('sales', 'Invoice Updated', `Invoice ${sale.invoiceNo} was updated.`);
+    return nextSale;
+  };
+
   // Purchase Order Add
   const addPurchase = (pur: Omit<Purchase, 'id' | 'purchaseNo' | 'date'>) => {
     if (!assertNotSalesman('create purchase orders')) return;
@@ -1385,6 +1486,8 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         cartTaxRate,
         setCartTaxRate,
         checkoutCart,
+        updateSale,
+        deleteSale,
         clearSaleDue,
         addProduct,
         addMultipleProducts,

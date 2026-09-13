@@ -116,13 +116,24 @@ export const OfflineSalesView: React.FC = () => {
 // 2. INVOICE VIEW COMPONENT
 // ==========================================
 export const InvoiceView: React.FC = () => {
-  const { sales, clearSaleDue } = useInventory();
+  const { sales, currentUser, clearSaleDue, updateSale, deleteSale } = useInventory();
+  const canManageInvoices = currentUser?.role === 'Administrator' || currentUser?.role === 'Manager';
   const [activeInvoice, setActiveInvoice] = useState<Sale | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [editingInvoice, setEditingInvoice] = useState(false);
+  const [editQuantities, setEditQuantities] = useState<Record<string, number>>({});
+  const [editDiscount, setEditDiscount] = useState('');
+
+  const editSubtotal = activeInvoice?.items.reduce((sum, item) => (
+    sum + item.price * Math.max(0, Number(editQuantities[item.productId] ?? item.quantity) || 0)
+  ), 0) ?? 0;
+  const editDiscountValue = Math.min(Math.max(0, Number(editDiscount) || 0), editSubtotal);
+  const editGrandTotal = Math.max(0, Math.round(editSubtotal - editDiscountValue));
+  const editExtraAmount = editGrandTotal - (activeInvoice?.total ?? 0);
 
   const filteredSales = sales.filter((sale) => {
     const searchValue = search.trim().toLowerCase();
@@ -208,7 +219,7 @@ export const InvoiceView: React.FC = () => {
                 <th className="p-4">Date / Time</th>
                 <th className="p-4 text-right">Discount</th>
                 <th className="p-4 text-right">Grand Total</th>
-                <th className="p-4 text-right">Total Profit</th>
+                {canManageInvoices && <th className="p-4 text-right">Total Profit</th>}
                 <th className="p-4 text-right">Due Amount</th>
                 <th className="p-4 text-center">Action</th>
               </tr>
@@ -222,7 +233,7 @@ export const InvoiceView: React.FC = () => {
                   <td className="p-4 text-slate-400">{new Date(sale.date).toLocaleString()}</td>
                   <td className="p-4 text-right font-medium text-rose-500">{sale.discount > 0 ? `-$${sale.discount.toFixed(2)}` : '—'}</td>
                   <td className="p-4 text-right font-black text-slate-800">${sale.total.toFixed(2)}</td>
-                  <td className="p-4 text-right font-black text-emerald-600">৳{Math.round(sale.total - (sale.costOfGoodsSold || 0))}</td>
+                  {canManageInvoices && <td className="p-4 text-right font-black text-emerald-600">৳{Math.round(sale.total - (sale.costOfGoodsSold || 0))}</td>}
                   <td className="p-4 text-right">
                     {sale.total > sale.paidAmount ? (
                       <button
@@ -250,7 +261,12 @@ export const InvoiceView: React.FC = () => {
                   </td>
                   <td className="p-4 text-center">
                     <button
-                      onClick={() => setActiveInvoice(sale)}
+                      onClick={() => {
+                        setActiveInvoice(sale);
+                        setEditingInvoice(false);
+                        setEditQuantities(Object.fromEntries(sale.items.map((item) => [item.productId, item.quantity])));
+                        setEditDiscount(String(sale.discount));
+                      }}
                       className="px-2.5 py-1 rounded-lg border border-slate-100 text-slate-500 hover:text-blue-600 hover:bg-blue-50 font-bold text-[10px] flex items-center space-x-1 mx-auto transition-colors"
                     >
                       <FileText className="w-3.5 h-3.5" />
@@ -272,7 +288,7 @@ export const InvoiceView: React.FC = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white p-6 rounded-2xl border border-slate-200 max-w-sm w-full space-y-4 shadow-2xl relative overflow-hidden"
+            className="bg-white p-6 rounded-2xl border border-slate-200 max-w-lg w-full space-y-4 shadow-2xl relative overflow-hidden"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-800 text-sm">Invoice Receipt Sheet</h3>
@@ -283,6 +299,51 @@ export const InvoiceView: React.FC = () => {
               >
                 ✕
               </button>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingInvoice((editing) => !editing)}
+                className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-bold text-[10px]"
+              >
+                {editingInvoice ? 'Cancel Edit' : 'Edit Memo'}
+              </button>
+              {canManageInvoices && <button
+                type="button"
+                onClick={async () => {
+                  const result = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Delete this memo?',
+                    text: `Invoice ${activeInvoice.invoiceNo} will be deleted and its stock restored.`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete Memo',
+                    confirmButtonColor: '#dc2626',
+                  });
+                  if (!result.isConfirmed) return;
+
+                  Swal.fire({
+                    title: 'Deleting memo...',
+                    text: 'Restoring stock and updating reports.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading(),
+                  });
+
+                  const deleted = await deleteSale(activeInvoice.id);
+                  Swal.close();
+                  if (!deleted) {
+                    await Swal.fire({ icon: 'error', title: 'Delete failed', text: 'The invoice could not be deleted.' });
+                    return;
+                  }
+                  setActiveInvoice(null);
+                  await Swal.fire({ icon: 'success', title: 'Memo deleted', timer: 1200, showConfirmButton: false });
+                }}
+                className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 font-bold text-[10px] hover:bg-rose-100"
+              >
+                Delete Memo
+              </button>}
             </div>
 
             {/* Receipt layout */}
@@ -305,9 +366,19 @@ export const InvoiceView: React.FC = () => {
               {/* Items */}
               <div className="space-y-1 border-b border-dashed border-slate-200 pb-2">
                 {activeInvoice.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-slate-600 font-semibold">
-                    <span>{item.productName} (x{item.quantity})</span>
-                    <span>৳{Math.round(item.price * item.quantity)}</span>
+                  <div key={index} className="flex items-center justify-between gap-3 text-slate-600 font-semibold">
+                    <span className="min-w-0">{item.productName} {editingInvoice ? '' : `(x${item.quantity})`}</span>
+                    {editingInvoice ? (
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={editQuantities[item.productId] ?? item.quantity}
+                        onChange={(event) => setEditQuantities((current) => ({ ...current, [item.productId]: Number(event.target.value) }))}
+                        className="w-20 px-2 py-1 border border-slate-200 rounded text-right"
+                        aria-label={`${item.productName} quantity`}
+                      />
+                    ) : <span>৳{Math.round(item.price * item.quantity)}</span>}
                   </div>
                 ))}
               </div>
@@ -316,13 +387,28 @@ export const InvoiceView: React.FC = () => {
               <div className="space-y-0.5 text-slate-500 font-semibold">
                 <div className="flex justify-between">
                   <span>Total Quantity:</span>
-                  <span>{activeInvoice.items.reduce((sum, item) => sum + item.quantity, 0)}</span>
+                  <span>{editingInvoice
+                    ? activeInvoice.items.reduce((sum, item) => sum + Math.max(0, Number(editQuantities[item.productId]) || 0), 0)
+                    : activeInvoice.items.reduce((sum, item) => sum + item.quantity, 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>৳{Math.round(activeInvoice.subtotal)}</span>
+                  <span>৳{Math.round(editingInvoice ? editSubtotal : activeInvoice.subtotal)}</span>
                 </div>
-                {activeInvoice.discount > 0 && (
+                {editingInvoice ? (
+                  <label className="flex justify-between items-center text-rose-500">
+                    <span>Discount:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={editDiscount}
+                      onChange={(event) => setEditDiscount(event.target.value)}
+                      className="w-24 px-2 py-1 border border-slate-200 rounded text-right text-slate-700"
+                      aria-label="Invoice discount"
+                    />
+                  </label>
+                ) : activeInvoice.discount > 0 && (
                   <div className="flex justify-between text-rose-500">
                     <span>Discount:</span>
                     <span>-৳{Math.round(activeInvoice.discount)}</span>
@@ -330,13 +416,19 @@ export const InvoiceView: React.FC = () => {
                 )}
                 <div className="flex justify-between text-slate-800 font-bold border-t border-dashed border-slate-200 pt-1.5 mt-1">
                   <span>GRAND TOTAL:</span>
-                  <span>৳{Math.round(activeInvoice.total)}</span>
+                  <span>৳{Math.round(editingInvoice ? editGrandTotal : activeInvoice.total)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-blue-600">
                   <span>Payment ({activeInvoice.paymentMethod}):</span>
-                  <span>৳{Math.round(activeInvoice.paidAmount)}</span>
+                  <span>৳{Math.round(editingInvoice ? editGrandTotal : activeInvoice.paidAmount)}</span>
                 </div>
-                {activeInvoice.paidAmount < activeInvoice.total && (
+                {editingInvoice && editExtraAmount !== 0 && (
+                  <div className={`flex justify-between font-bold ${editExtraAmount > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    <span>Extra Amount to {editExtraAmount > 0 ? 'Get' : 'Give'}:</span>
+                    <span>৳{Math.abs(editExtraAmount)}</span>
+                  </div>
+                )}
+                {!editingInvoice && activeInvoice.paidAmount < activeInvoice.total && (
                   <div className="flex justify-between font-bold text-rose-600">
                     <span>Due Amount:</span>
                     <span>৳{Math.round(activeInvoice.total - activeInvoice.paidAmount)}</span>
@@ -344,6 +436,28 @@ export const InvoiceView: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {editingInvoice && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const updated = await updateSale(activeInvoice.id, {
+                    quantities: editQuantities,
+                    discount: editDiscountValue,
+                  });
+                  if (!updated) {
+                    Swal.fire({ icon: 'error', title: 'Unable to update invoice', text: 'Check quantities, discount, and available stock.' });
+                    return;
+                  }
+                  setActiveInvoice(updated);
+                  setEditingInvoice(false);
+                  Swal.fire({ icon: 'success', title: 'Invoice updated', timer: 1200, showConfirmButton: false });
+                }}
+                className="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700"
+              >
+                Save Memo Changes
+              </button>
+            )}
 
             {/* Print action */}
             <button

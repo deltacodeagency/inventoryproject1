@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory, ensureProductBatches } from '../context/InventoryContext';
+import { Product } from '../types';
 import Swal from 'sweetalert2';
 import {
   TrendingUp,
@@ -61,6 +62,16 @@ export const ReportsView: React.FC = () => {
   const filteredExpenses = expenses.filter(e => isWithinDate(e.date));
   const filteredIncomes = incomes.filter(i => isWithinDate(i.date));
   const filteredAdjustments = adjustments.filter(a => isWithinDate(a.date));
+  const reportProducts: Array<Pick<Product, 'id' | 'name' | 'price' | 'cost' | 'stock'>> = Array.from(new Map<string, Pick<Product, 'id' | 'name' | 'price' | 'cost' | 'stock'>>([
+    ...products.map((product) => [product.id, product] as const),
+    ...filteredSales.flatMap((sale) => sale.items.map((item) => [item.productId, {
+      id: item.productId,
+      name: item.productName,
+      price: item.price,
+      cost: item.cost ?? 0,
+      stock: 0,
+    }] as const)),
+  ]).values());
 
   const totalSalesSum = filteredSales.reduce((sum, s) => sum + s.total, 0);
   
@@ -314,7 +325,7 @@ export const ReportsView: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-slate-600">
-                  {products.map((prod) => {
+                  {reportProducts.map((prod) => {
                     // Calculate sold units and FIFO-based profits
                     let soldUnits = 0;
                     let totalRevenueOfProduct = 0;
