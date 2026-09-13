@@ -315,6 +315,10 @@ export const InvoiceView: React.FC = () => {
               {/* Totals */}
               <div className="space-y-0.5 text-slate-500 font-semibold">
                 <div className="flex justify-between">
+                  <span>Total Quantity:</span>
+                  <span>{activeInvoice.items.reduce((sum, item) => sum + item.quantity, 0)}</span>
+                </div>
+                <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>৳{Math.round(activeInvoice.subtotal)}</span>
                 </div>
@@ -346,6 +350,7 @@ export const InvoiceView: React.FC = () => {
               onClick={() => {
                 const formattedCustomer = displayCustomerName(activeInvoice.customerName);
                 const serialNo = activeInvoice.receiptSerial || activeInvoice.invoiceNo;
+                const totalQuantity = activeInvoice.items.reduce((sum, item) => sum + item.quantity, 0);
                 const itemsHtml = activeInvoice.items.map((item) => `
                   <tr style="border-bottom: 1px solid #cbd5e1;">
                     <td style="padding: 6px 0;">
@@ -392,6 +397,10 @@ export const InvoiceView: React.FC = () => {
                     <div style="display: flex; justify-content: space-between; margin: 4px 0;">
                       <span>Subtotal:</span>
                       <span style="font-weight: bold;">৳${Math.round(activeInvoice.subtotal)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+                      <span>Total Quantity:</span>
+                      <span style="font-weight: bold;">${totalQuantity}</span>
                     </div>
                     ${activeInvoice.discount > 0 ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; color: #dc2626;"><span>Discount:</span><span>-৳${Math.round(activeInvoice.discount)}</span></div>` : ''}
                     <div style="border-bottom: 1px dashed #94a3b8; margin: 10px 0;"></div>

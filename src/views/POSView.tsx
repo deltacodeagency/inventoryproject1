@@ -158,6 +158,7 @@ export const POSView: React.FC = () => {
   const handlePrintReceipt = (receipt: Sale) => {
     const formattedCustomer = displayCustomerName(receipt.customerName);
     const serialNo = receipt.receiptSerial || receipt.invoiceNo;
+    const totalQuantity = receipt.items.reduce((sum, item) => sum + item.quantity, 0);
     const itemsHtml = receipt.items
       .map(
         (item) => `
@@ -209,6 +210,10 @@ export const POSView: React.FC = () => {
         <div style="display: flex; justify-content: space-between; margin: 4px 0;">
           <span>Subtotal:</span>
           <span style="font-weight: bold;">৳${Math.round(receipt.subtotal)}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 4px 0;">
+          <span>Total Quantity:</span>
+          <span style="font-weight: bold;">${totalQuantity}</span>
         </div>
         ${
           receipt.discount > 0
