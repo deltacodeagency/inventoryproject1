@@ -118,12 +118,83 @@ export const OfflineSalesView: React.FC = () => {
 export const InvoiceView: React.FC = () => {
   const { sales, clearSaleDue } = useInventory();
   const [activeInvoice, setActiveInvoice] = useState<Sale | null>(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const filteredSales = sales.filter((sale) => {
+    const searchValue = search.trim().toLowerCase();
+    const matchesSearch = !searchValue || [sale.invoiceNo, sale.customerName, sale.salesperson]
+      .some((value) => value?.toLowerCase().includes(searchValue));
+    const matchesStatus = statusFilter === 'all' || sale.status === statusFilter;
+    const matchesPayment = paymentFilter === 'all' || sale.paymentMethod === paymentFilter;
+    const saleDate = new Date(sale.date);
+    const matchesStartDate = !startDate || saleDate >= new Date(`${startDate}T00:00:00`);
+    const matchesEndDate = !endDate || saleDate <= new Date(`${endDate}T23:59:59.999`);
+    return matchesSearch && matchesStatus && matchesPayment && matchesStartDate && matchesEndDate;
+  });
 
   return (
     <div className="space-y-6 text-xs text-slate-600 select-none">
       <div className="mobile-page-header">
         <h3 className="text-base font-bold text-slate-800">Sales & Invoices</h3>
         <span className="text-[10px] text-slate-400 block -mt-0.5">Review sales history and manage printable retail invoices</span>
+      </div>
+
+      <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search invoice, customer..."
+              className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <AppSelect
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Filter by invoice status"
+            className="w-full border border-slate-200 rounded-xl text-xs font-semibold text-slate-700"
+          >
+            <option value="all">All Statuses</option>
+            <option value="Paid">Paid</option>
+            <option value="Partial">Partial</option>
+            <option value="Returned">Returned</option>
+          </AppSelect>
+          <AppSelect
+            value={paymentFilter}
+            onChange={(event) => setPaymentFilter(event.target.value)}
+            aria-label="Filter by payment method"
+            className="w-full border border-slate-200 rounded-xl text-xs font-semibold text-slate-700"
+          >
+            <option value="all">All Payment Methods</option>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Mobile">Mobile</option>
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+            <option value="Rocket">Rocket</option>
+          </AppSelect>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+            aria-label="Invoice start date"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+            aria-label="Invoice end date"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
+          />
+        </div>
       </div>
 
       <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
@@ -143,7 +214,7 @@ export const InvoiceView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 text-slate-600">
-              {sales.map((sale) => (
+              {filteredSales.map((sale) => (
                 <tr key={sale.id} className="hover:bg-slate-50/30 transition-colors">
                   <td className="p-4 font-mono font-bold text-slate-800">{sale.invoiceNo}</td>
                   <td className="p-4 font-semibold text-slate-800">{sale.customerName}</td>

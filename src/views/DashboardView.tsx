@@ -18,7 +18,7 @@ import {
 import { TakaIcon } from '../components/TakaIcon';
 import { AppSelect } from '../components/AppSelect';
 
-const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({ value, animateValue }) => {
+const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean; decimals?: number }> = ({ value, animateValue, decimals = 2 }) => {
   const [displayValue, setDisplayValue] = useState(animateValue ? 0 : value);
   const hasAnimated = React.useRef(false);
 
@@ -45,7 +45,7 @@ const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean }> = ({
     return () => animation.stop();
   }, [value, animateValue]);
 
-  return <>৳{displayValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
+  return <>৳{displayValue.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>;
 };
 
 export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateValues = true }) => {
@@ -500,7 +500,7 @@ export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateVa
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Purchases</span>
-            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalPurchasesVal} animateValue={animateValues} /></h3>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalPurchasesVal} animateValue={animateValues} decimals={0} /></h3>
             <span className="text-[10px] sm:text-[11px] text-blue-600 font-bold flex items-center bg-blue-50 px-2 py-0.5 rounded-full w-fit">
               <ShoppingCart className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{totalStockEntries} stock additions</span>
@@ -516,7 +516,7 @@ export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateVa
         <div className="p-4 sm:p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="space-y-1 z-10 min-w-0 flex-1 mr-2">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Stock Asset Value</span>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalStockVal} animateValue={animateValues} /></h3>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-800 whitespace-nowrap"><AnimatedTakaValue value={totalStockVal} animateValue={animateValues} decimals={0} /></h3>
             <span className="text-[10px] sm:text-[11px] text-indigo-600 font-bold flex items-center bg-indigo-50 px-2 py-0.5 rounded-full w-fit">
               <Boxes className="w-3 h-3 mr-1 shrink-0" />
               <span className="truncate">{products.length} distinct products</span>
