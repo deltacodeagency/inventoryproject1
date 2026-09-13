@@ -343,7 +343,7 @@ export const ReportsView: React.FC = () => {
                         <td className="p-3 text-center font-bold text-slate-400">{prod.stock}</td>
                         <td className="p-3 text-center font-bold text-slate-700">{soldUnits}</td>
                         <td className="p-3 text-left font-semibold text-emerald-600">
-                          {profitPercentage.toFixed(1)}% (৳{profitPerUnit.toFixed(0)} / unit)
+                          {profitPercentage.toFixed(1)}% (৳{profitPerUnit.toFixed(2)} / unit)
                         </td>
                       </tr>
                     );

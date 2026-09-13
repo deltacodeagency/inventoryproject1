@@ -104,7 +104,7 @@ export const ProductDetailView: React.FC = () => {
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition-colors">
                   <td className="p-4 font-bold text-slate-500 bg-slate-50/30">Supplier Cost</td>
-                  <td className="p-4 font-bold text-slate-400">৳{viewingProduct.cost.toFixed(0)}</td>
+                  <td className="p-4 font-bold text-slate-400">৳{viewingProduct.cost.toFixed(2)}</td>
                 </tr>
                 <tr className="hover:bg-slate-50/50 transition-colors">
                   <td className="p-4 font-bold text-slate-500 bg-slate-50/30">Stock Quantity</td>

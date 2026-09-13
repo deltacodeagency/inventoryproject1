@@ -171,7 +171,7 @@ export const ProductsView: React.FC = () => {
       if (visibleColumns.brand) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">${br}</td>`);
       if (visibleColumns.supplier) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">${sup}</td>`);
       if (visibleColumns.price) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${p.price.toFixed(0)}</td>`);
-      if (visibleColumns.cost) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${p.cost.toFixed(0)}</td>`);
+      if (visibleColumns.cost) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${p.cost.toFixed(2)}</td>`);
       if (visibleColumns.stock) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: center;">${p.stock}</td>`);
       
       return `<tr>${tds.join('')}</tr>`;
@@ -1509,7 +1509,7 @@ export const ProductsView: React.FC = () => {
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-extrabold text-slate-800">৳{p.price.toFixed(0)}</span>
                             {currentUser?.role !== 'Salesman' && (
-                              <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{p.cost.toFixed(0)}</span>
+                              <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{p.cost.toFixed(2)}</span>
                             )}
                           </div>
 
@@ -1691,7 +1691,7 @@ export const ProductsView: React.FC = () => {
 
                         {/* Supplier Cost */}
                         {currentUser?.role !== 'Salesman' && (
-                          <td className="p-4 text-left font-medium text-slate-400">৳{p.cost.toFixed(0)}</td>
+                          <td className="p-4 text-left font-medium text-slate-400">৳{p.cost.toFixed(2)}</td>
                         )}
 
                         {/* Real-time Stock level */}

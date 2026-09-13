@@ -303,8 +303,8 @@ export const CreateProductView: React.FC = () => {
       targetDescription = editingProduct.description || '';
       setDescription(targetDescription);
       setQuantity(String(editingProduct.stock));
-      setSellPrice(String(Math.round(editingProduct.price)));
-      setBuyPrice(String(Math.round(editingProduct.cost)));
+      setSellPrice(String(editingProduct.price));
+      setBuyPrice(String(editingProduct.cost));
       setQuantityAlert(String(editingProduct.minStockAlert));
       setImages(editingProduct.image ? [editingProduct.image] : []);
       setStatus(editingProduct.status || 'active');
@@ -518,8 +518,8 @@ export const CreateProductView: React.FC = () => {
         categoryId,
         brandId,
         supplierId: finalSupplierId,
-        price: Math.round(Number(sellPrice)) || 0,
-        cost: Math.round(Number(buyPrice)) || 0,
+        price: Number(sellPrice) || 0,
+        cost: Number(buyPrice) || 0,
         stock: Number(quantity) || 0,
         minStockAlert: Number(quantityAlert) || 5,
         image: images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80',
@@ -535,8 +535,8 @@ export const CreateProductView: React.FC = () => {
         categoryId,
         brandId,
         supplierId: finalSupplierId,
-        price: Math.round(Number(sellPrice)) || 0,
-        cost: Math.round(Number(buyPrice)) || 0,
+        price: Number(sellPrice) || 0,
+        cost: Number(buyPrice) || 0,
         stock: Number(quantity) || 0,
         minStockAlert: Number(quantityAlert) || 5,
         image: images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80',
@@ -1076,7 +1076,7 @@ export const CreateProductView: React.FC = () => {
                       type="number"
                       required
                       min="0"
-                      step="1"
+                      step="0.01"
                       placeholder="Enter buy price"
                       value={buyPrice}
                       onChange={(e) => setBuyPrice(e.target.value)}
@@ -1096,7 +1096,7 @@ export const CreateProductView: React.FC = () => {
                       type="number"
                       required
                       min="0"
-                      step="1"
+                      step="0.01"
                       placeholder="Enter sell price"
                       value={sellPrice}
                       onChange={(e) => setSellPrice(e.target.value)}
