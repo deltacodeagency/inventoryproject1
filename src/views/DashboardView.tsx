@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { TakaIcon } from '../components/TakaIcon';
 import { AppSelect } from '../components/AppSelect';
+import { calculateStockAssetValue, calculateTotalPurchases } from '../lib/inventoryMetrics';
 
 const AnimatedTakaValue: React.FC<{ value: number; animateValue: boolean; decimals?: number }> = ({ value, animateValue, decimals = 2 }) => {
   const [displayValue, setDisplayValue] = useState(animateValue ? 0 : value);
@@ -136,20 +137,11 @@ export const DashboardView: React.FC<{ animateValues?: boolean }> = ({ animateVa
 
   // --- CORE TOTALS (REAL-TIME DATA) ---
   const totalSalesVal = useMemo(() => sales.reduce((sum, s) => sum + (s.total || 0), 0), [sales]);
-  const totalPurchasesVal = useMemo(() => { return products.reduce((sum, p) => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); const batchVal = batches.reduce((bSum, b) => bSum + ((b.initialQuantity || b.quantity || 0) * (b.cost || 0)), 0); return sum + batchVal; }, 0); }, [products]); const totalStockEntries = useMemo(() => { return products.reduce((sum, p) => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); return sum + batches.length; }, 0); }, [products]);
+  const totalPurchasesVal = useMemo(() => calculateTotalPurchases(products), [products]); const totalStockEntries = useMemo(() => { return products.reduce((sum, p) => { const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []); return sum + batches.length; }, 0); }, [products]);
   const totalExpensesVal = useMemo(() => expenses.reduce((sum, e) => sum + (e.amount || 0), 0), [expenses]);
 
   // Stock Asset Value (calculated using batches or product cost * stock)
-  const totalStockVal = useMemo(() => {
-    return products.reduce((sum, p) => {
-      const batches = ensureProductBatches ? ensureProductBatches(p) : (p.batches || []);
-      if (batches && batches.length > 0) {
-        const batchVal = batches.reduce((bSum, b) => bSum + (b.cost || 0) * (b.quantity || 0), 0);
-        return sum + batchVal;
-      }
-      return sum + ((p.cost || 0) * (p.stock || 0));
-    }, 0);
-  }, [products]);
+  const totalStockVal = useMemo(() => calculateStockAssetValue(products), [products]);
 
   // COGS & Profit
   const cogsVal = useMemo(() => {

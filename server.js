@@ -385,6 +385,45 @@ async function ensureLegacyUserCredentials() {
   })));
 }
 
+async function backfillProductBatchPurchases() {
+  const [products, suppliers] = await Promise.all([
+    prisma.product.findMany({ include: { batches: true } }),
+    prisma.supplier.findMany({ orderBy: { createdAt: 'asc' } }),
+  ]);
+  if (suppliers.length === 0) return;
+
+  const fallbackSupplier = suppliers[0];
+  for (const product of products) {
+    for (const batch of product.batches) {
+      const purchaseNo = `PUR-OPENING-${batch.id}`;
+      const existing = await prisma.purchase.findUnique({ where: { purchaseNo } });
+      if (existing || (batch.initialQuantity || batch.quantity || 0) <= 0) continue;
+
+      const supplier = suppliers.find((item) => item.id === product.supplierId) || fallbackSupplier;
+      await prisma.purchase.create({
+        data: {
+          id: `purchase-${batch.id}`,
+          purchaseNo,
+          date: batch.date,
+          supplierId: supplier.id,
+          supplierName: supplier.company || supplier.name,
+          total: (batch.initialQuantity || batch.quantity) * (batch.cost || 0),
+          status: 'Received',
+          items: {
+            create: {
+              id: `purchase-item-${batch.id}`,
+              productId: product.id,
+              productName: product.name,
+              quantity: batch.initialQuantity || batch.quantity,
+              cost: batch.cost || 0,
+            },
+          },
+        },
+      });
+    }
+  }
+}
+
 async function persistCollection(collection, records = []) {
   if (!Array.isArray(records)) return { count: 0 };
 
@@ -717,6 +756,7 @@ if (process.env.VERCEL !== '1') {
   app.listen(port, async () => {
     try {
       await ensureLegacyUserCredentials();
+      await backfillProductBatchPurchases();
       console.log(`Prisma sync server running on http://localhost:${port}`);
     } catch (error) {
       console.error('User credential migration failed:', error);

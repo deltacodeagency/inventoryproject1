@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInventory, ensureProductBatches } from '../context/InventoryContext';
 import { Product } from '../types';
+import { calculateStockAssetValue, calculateTotalPurchases } from '../lib/inventoryMetrics';
 import Swal from 'sweetalert2';
 import {
   TrendingUp,
@@ -62,6 +63,7 @@ export const ReportsView: React.FC = () => {
   const filteredExpenses = expenses.filter(e => isWithinDate(e.date));
   const filteredIncomes = incomes.filter(i => isWithinDate(i.date));
   const filteredAdjustments = adjustments.filter(a => isWithinDate(a.date));
+  const purchaseAdjustments = filteredAdjustments.filter(a => a.type === 'addition');
   const reportProducts: Array<Pick<Product, 'id' | 'name' | 'price' | 'cost' | 'stock'>> = Array.from(new Map<string, Pick<Product, 'id' | 'name' | 'price' | 'cost' | 'stock'>>([
     ...products.map((product) => [product.id, product] as const),
     ...filteredSales.flatMap((sale) => sale.items.map((item) => [item.productId, {
@@ -75,31 +77,13 @@ export const ReportsView: React.FC = () => {
 
   const totalSalesSum = filteredSales.reduce((sum, s) => sum + s.total, 0);
   
-  const purchaseAdjustments = filteredAdjustments.filter(a => a.type === 'addition');
-  const adjustmentPurchaseTotal = purchaseAdjustments.reduce((sum, a) => {
-      const prod = products.find(p => p.id === a.productId);
-      return sum + (a.quantity * (a.cost || (prod?.cost ?? 0)));
-  }, 0);
-  const storedPurchasesTotal = filteredPurchases.reduce((sum, purchase) => {
-    const lineItemTotal = purchase.items.reduce((itemSum, item) => itemSum + (item.quantity * item.cost), 0);
-    return sum + (purchase.total || lineItemTotal);
-  }, 0) + adjustmentPurchaseTotal;
-  const batchPurchasesTotal = products.reduce((sum, product) => {
-    const batches = ensureProductBatches(product);
-    return sum + batches
-      .filter(batch => isWithinDate(batch.date || product.createdAt || ''))
-      .reduce((batchSum, batch) => batchSum + ((batch.initialQuantity || batch.quantity || 0) * (batch.cost || 0)), 0);
-  }, 0);
-  const totalPurchasesSum = purchases.length > 0 ? storedPurchasesTotal : batchPurchasesTotal;
+  const totalPurchasesSum = calculateTotalPurchases(products);
 
   const totalExpensesSum = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   
   const totalIncomesSum = filteredIncomes.reduce((sum, i) => sum + i.amount, 0) + totalSalesSum;
 
-  const stockAssetValuation = products.reduce((sum, p) => {
-    const batches = ensureProductBatches(p);
-    return sum + batches.reduce((bSum, b) => bSum + b.cost * b.quantity, 0);
-  }, 0);
+  const stockAssetValuation = calculateStockAssetValue(products);
   const totalStockUnitsCount = products.reduce((sum, p) => sum + p.stock, 0);
 
   // Render proper sub-report depending on activeView

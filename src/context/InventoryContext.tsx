@@ -244,6 +244,7 @@ export const syncBatchesToStock = (
       if (result[i].quantity <= 0) continue;
       const subtract = Math.min(result[i].quantity, diff);
       result[i].quantity -= subtract;
+      result[i].initialQuantity = Math.max(0, result[i].initialQuantity - subtract);
       diff -= subtract;
       if (diff <= 0) break;
     }
@@ -605,6 +606,20 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }] : []
     };
     setProducts((prev) => [newProd, ...prev]);
+    if (p.stock > 0) {
+      const supplier = suppliers.find((item) => item.id === p.supplierId);
+      const purchaseNo = `PUR-2026-${String(purchases.length + 1).padStart(3, '0')}`;
+      setPurchases((prev) => [{
+        id: `pur-${Date.now()}`,
+        purchaseNo,
+        date: createdAt,
+        supplierId: p.supplierId,
+        supplierName: supplier?.company || supplier?.name || 'Opening Stock',
+        items: [{ productId: id, productName: p.name, quantity: p.stock, cost: p.cost }],
+        total: p.stock * p.cost,
+        status: 'Received',
+      }, ...prev]);
+    }
     
     addAlert('system', 'New Product Created', `${newProd.name} (SKU: ${newProd.sku}) has been added.`, newProd.id);
   };
@@ -615,6 +630,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setProducts((prev) => {
       let currentProducts = [...prev];
       const addedProductNames: string[] = [];
+      const newPurchases: Purchase[] = [];
       
       list.forEach((p, idx) => {
         const id = `prod-${Date.now()}-${idx}`;
@@ -636,7 +652,21 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         };
         currentProducts = [newProd, ...currentProducts];
         addedProductNames.push(newProd.name);
+        if (p.stock > 0) {
+          const supplier = suppliers.find((item) => item.id === p.supplierId);
+          newPurchases.push({
+            id: `pur-${Date.now()}-${idx}`,
+            purchaseNo: `PUR-2026-${String(purchases.length + idx + 1).padStart(3, '0')}`,
+            date: createdAt,
+            supplierId: p.supplierId,
+            supplierName: supplier?.company || supplier?.name || 'Opening Stock',
+            items: [{ productId: id, productName: p.name, quantity: p.stock, cost: p.cost }],
+            total: p.stock * p.cost,
+            status: 'Received',
+          });
+        }
       });
+      if (newPurchases.length > 0) setPurchases((prev) => [...newPurchases, ...prev]);
       
       addAlert(
         'system', 
@@ -655,6 +685,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           let updatedBatches = prod.batches && prod.batches.length > 0 ? prod.batches.map(b => ({ ...b })) : ensureProductBatches(prod);
           
           if (p.stock !== undefined && p.stock !== prod.stock) {
+            const stockDifference = p.stock - prod.stock;
             updatedBatches = syncBatchesToStock(
               updatedBatches,
               p.stock,
@@ -662,6 +693,33 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               p.price !== undefined ? p.price : prod.price,
               new Date().toISOString()
             );
+            if (stockDifference > 0) {
+              const supplier = suppliers.find((item) => item.id === prod.supplierId);
+              const purchaseNo = `PUR-2026-${String(purchases.length + 1).padStart(3, '0')}`;
+              setPurchases((previousPurchases) => [{
+                id: `pur-${Date.now()}`,
+                purchaseNo,
+                date: new Date().toISOString(),
+                supplierId: prod.supplierId,
+                supplierName: supplier?.company || supplier?.name || 'Stock Increase',
+                items: [{ productId: prod.id, productName: prod.name, quantity: stockDifference, cost: p.cost ?? prod.cost }],
+                total: stockDifference * (p.cost ?? prod.cost),
+                status: 'Received',
+              }, ...previousPurchases]);
+            } else {
+              let remaining = Math.abs(stockDifference);
+              setPurchases((previousPurchases) => previousPurchases.flatMap((purchase) => {
+                if (remaining <= 0) return [purchase];
+                const items = purchase.items.map((item) => {
+                  if (item.productId !== prod.id || remaining <= 0) return item;
+                  const reduced = Math.min(item.quantity, remaining);
+                  remaining -= reduced;
+                  return { ...item, quantity: item.quantity - reduced };
+                }).filter((item) => item.quantity > 0);
+                if (items.length === 0 && purchase.items.some((item) => item.productId === prod.id)) return [];
+                return [{ ...purchase, items, total: items.reduce((sum, item) => sum + item.quantity * item.cost, 0) }];
+              }));
+            }
           } else {
             if (p.price !== undefined || p.cost !== undefined) {
               updatedBatches = updatedBatches.map(b => {
@@ -1188,6 +1246,35 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       date: new Date().toISOString(),
     };
     setAdjustments((prev) => [newAdj, ...prev]);
+
+    const product = products.find((item) => item.id === adj.productId);
+    if (product && adj.type === 'addition') {
+      const supplier = suppliers.find((item) => item.id === product.supplierId);
+      const purchaseNo = `PUR-2026-${String(purchases.length + 1).padStart(3, '0')}`;
+      setPurchases((prev) => [{
+        id: `pur-adj-${Date.now()}`,
+        purchaseNo,
+        date: newAdj.date,
+        supplierId: product.supplierId,
+        supplierName: supplier?.company || supplier?.name || 'Stock Adjustment',
+        items: [{ productId: product.id, productName: product.name, quantity: adj.quantity, cost: adj.cost ?? product.cost }],
+        total: adj.quantity * (adj.cost ?? product.cost),
+        status: 'Received',
+      }, ...prev]);
+    } else if (adj.type === 'deduction') {
+      let remaining = adj.quantity;
+      setPurchases((previousPurchases) => previousPurchases.flatMap((purchase) => {
+        if (remaining <= 0) return [purchase];
+        const items = purchase.items.map((item) => {
+          if (item.productId !== adj.productId || remaining <= 0) return item;
+          const reduced = Math.min(item.quantity, remaining);
+          remaining -= reduced;
+          return { ...item, quantity: item.quantity - reduced };
+        }).filter((item) => item.quantity > 0);
+        if (items.length === 0 && purchase.items.some((item) => item.productId === adj.productId)) return [];
+        return [{ ...purchase, items, total: items.reduce((sum, item) => sum + item.quantity * item.cost, 0) }];
+      }));
+    }
 
     // Update product stock immediately
     setProducts((prev) =>
