@@ -432,7 +432,11 @@ export const BrandView: React.FC = () => {
                         {count} items
                       </span>
                     </td>
-                    <td className="p-4 text-center font-bold text-slate-700">{totalQuantity} units</td>
+                    <td className="p-4 text-center">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold text-[10px]">
+                        {totalQuantity} units
+                      </span>
+                    </td>
                     <td className="p-4 text-right flex items-center justify-end space-x-1.5">
                       <button
                         onClick={() => {
