@@ -137,6 +137,7 @@ export const InvoiceView: React.FC = () => {
                 <th className="p-4">Date / Time</th>
                 <th className="p-4 text-right">Discount</th>
                 <th className="p-4 text-right">Grand Total</th>
+                <th className="p-4 text-right">Total Profit</th>
                 <th className="p-4 text-right">Due Amount</th>
                 <th className="p-4 text-center">Action</th>
               </tr>
@@ -150,6 +151,7 @@ export const InvoiceView: React.FC = () => {
                   <td className="p-4 text-slate-400">{new Date(sale.date).toLocaleString()}</td>
                   <td className="p-4 text-right font-medium text-rose-500">{sale.discount > 0 ? `-$${sale.discount.toFixed(2)}` : '—'}</td>
                   <td className="p-4 text-right font-black text-slate-800">${sale.total.toFixed(2)}</td>
+                  <td className="p-4 text-right font-black text-emerald-600">৳{Math.round(sale.total - (sale.costOfGoodsSold || 0))}</td>
                   <td className="p-4 text-right">
                     {sale.total > sale.paidAmount ? (
                       <button

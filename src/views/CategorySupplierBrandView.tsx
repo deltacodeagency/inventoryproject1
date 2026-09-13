@@ -393,12 +393,15 @@ export const BrandView: React.FC = () => {
                 <th className="p-4">Brand Name</th>
                 <th className="p-4">Description</th>
                 <th className="p-4 text-center">Linked Products</th>
+                <th className="p-4 text-center">Total Quantity</th>
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {brands.map((br) => {
-                const count = products.filter((p) => p.brandId === br.id).length;
+                const brandProducts = products.filter((p) => p.brandId === br.id);
+                const count = brandProducts.length;
+                const totalQuantity = brandProducts.reduce((sum, product) => sum + product.stock, 0);
                 const isSelected = selectedBrandIds.includes(br.id);
                 return (
                   <tr
@@ -429,6 +432,7 @@ export const BrandView: React.FC = () => {
                         {count} items
                       </span>
                     </td>
+                    <td className="p-4 text-center font-bold text-slate-700">{totalQuantity} units</td>
                     <td className="p-4 text-right flex items-center justify-end space-x-1.5">
                       <button
                         onClick={() => {
