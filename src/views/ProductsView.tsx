@@ -24,6 +24,11 @@ import {
 } from 'lucide-react';
 import { Product } from '../types';
 import { AppSelect } from '../components/AppSelect';
+
+const formatCost = (cost: number) => cost.toLocaleString(undefined, {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
 import { appNavigate } from '../lib/appNavigate';
 import ExcelJS from 'exceljs';
 
@@ -171,7 +176,7 @@ export const ProductsView: React.FC = () => {
       if (visibleColumns.brand) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">${br}</td>`);
       if (visibleColumns.supplier) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">${sup}</td>`);
       if (visibleColumns.price) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${p.price.toFixed(0)}</td>`);
-      if (visibleColumns.cost) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${p.cost.toFixed(2)}</td>`);
+      if (visibleColumns.cost) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">৳${formatCost(p.cost)}</td>`);
       if (visibleColumns.stock) tds.push(`<td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: center;">${p.stock}</td>`);
       
       return `<tr>${tds.join('')}</tr>`;
@@ -690,6 +695,16 @@ export const ProductsView: React.FC = () => {
     return String(val);
   };
 
+  const getExcelNumber = (val: any): number => {
+    if (typeof val === 'number' && Number.isFinite(val)) return val;
+    if (val && typeof val === 'object') {
+      if (val.result !== undefined) return getExcelNumber(val.result);
+      if (val.value !== undefined) return getExcelNumber(val.value);
+    }
+    const parsed = Number(String(val ?? '').replace(/,/g, '').trim());
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
   const parseExcel = async (arrayBuffer: ArrayBuffer) => {
     try {
       const workbook = new ExcelJS.Workbook();
@@ -796,7 +811,7 @@ export const ProductsView: React.FC = () => {
         }
 
         const price = Math.round(Number(rowObj['price'])) || 0;
-        const cost = Number(rowObj['cost']) || 0;
+        const cost = getExcelNumber(fields[headers.indexOf('cost')]);
         const stock = Math.round(Number(rowObj['stock'])) || 0;
         const minStockAlert = rowObj['minstockalert'] ? (Math.round(Number(rowObj['minstockalert'])) || 5) : 5;
         const rawSku = (rowObj['model'] || rowObj['sku'] || '').trim();
@@ -1509,7 +1524,7 @@ export const ProductsView: React.FC = () => {
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-extrabold text-slate-800">৳{p.price.toFixed(0)}</span>
                             {currentUser?.role !== 'Salesman' && (
-                              <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{p.cost.toFixed(2)}</span>
+                              <span className="text-[9px] text-slate-400 font-medium">Cost: ৳{formatCost(p.cost)}</span>
                             )}
                           </div>
 
@@ -1691,7 +1706,7 @@ export const ProductsView: React.FC = () => {
 
                         {/* Supplier Cost */}
                         {currentUser?.role !== 'Salesman' && (
-                          <td className="p-4 text-left font-medium text-slate-400">৳{p.cost.toFixed(2)}</td>
+                          <td className="p-4 text-left font-medium text-slate-400">৳{formatCost(p.cost)}</td>
                         )}
 
                         {/* Real-time Stock level */}
