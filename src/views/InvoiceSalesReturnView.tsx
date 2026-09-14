@@ -118,6 +118,9 @@ export const OfflineSalesView: React.FC = () => {
 export const InvoiceView: React.FC = () => {
   const { sales, currentUser, clearSaleDue, updateSale, deleteSale } = useInventory();
   const canManageInvoices = currentUser?.role === 'Administrator' || currentUser?.role === 'Manager';
+  const canDeleteMemo = currentUser?.role !== 'Administrator'
+    && currentUser?.role !== 'Manager'
+    && currentUser?.role !== 'Salesman';
   const [activeInvoice, setActiveInvoice] = useState<Sale | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -309,7 +312,7 @@ export const InvoiceView: React.FC = () => {
               >
                 {editingInvoice ? 'Cancel Edit' : 'Edit Memo'}
               </button>
-              {canManageInvoices && <button
+              {canDeleteMemo && <button
                 type="button"
                 onClick={async () => {
                   const result = await Swal.fire({
